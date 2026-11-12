@@ -1,0 +1,154 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Tester Short "They Smile - Part 1". Deterministic: render.js calls render(t) for every frame. -->
+<style>
+  html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#000}
+  body{font-family:Inter,"DejaVu Sans",sans-serif;color:#eee}
+  #stage{position:absolute;inset:0;background:#07070a}
+  /* hook card */
+  #hook{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#000;text-align:center}
+  .hk{font-family:"Inter Display",Inter,sans-serif;font-weight:900;font-size:104px;line-height:1.02;letter-spacing:-2px;text-transform:uppercase;padding:0 70px}
+  #hk1{color:#f2f2f2}
+  #hk2{color:#d01b1b;margin-top:40px}
+  /* phone ui */
+  #phone{position:absolute;inset:0}
+  #status{position:absolute;top:70px;left:70px;right:70px;display:flex;justify-content:space-between;font-size:38px;font-weight:600;color:#ddd}
+  #header{position:absolute;top:150px;left:0;right:0;height:190px;border-bottom:2px solid #1c1c22;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#0c0c10}
+  #avatar{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#5a2a3a,#2a1a2a);display:flex;align-items:center;justify-content:center;font-size:46px;font-weight:700;color:#e9cbd3}
+  #name{margin-top:10px;font-size:38px;font-weight:600}
+  #part{position:absolute;top:200px;right:60px;font-size:30px;font-weight:800;letter-spacing:3px;color:#d01b1b;border:3px solid #d01b1b;padding:6px 14px;border-radius:8px}
+  #msgs{position:absolute;top:350px;left:0;right:0;bottom:440px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:0 48px}
+  .m{max-width:760px;font-size:50px;line-height:1.22;padding:24px 34px;border-radius:44px;margin-top:18px;transform-origin:bottom left}
+  .in{align-self:flex-start;background:#26262c;color:#f1f1f1;border-bottom-left-radius:12px}
+  .out{align-self:flex-end;background:#2f5fd0;color:#fff;border-bottom-right-radius:12px;transform-origin:bottom right}
+  .out.panic{background:#c0161b;font-weight:800}
+  .emoji{background:none!important;font-size:230px;padding:0 10px;line-height:1;font-family:"Noto Color Emoji"}
+  .typing{align-self:flex-start;background:#26262c;border-radius:44px;border-bottom-left-radius:12px;padding:30px 34px;margin-top:18px;display:flex;gap:14px}
+  .typing i{width:22px;height:22px;border-radius:50%;background:#8a8a92;display:block}
+  .read{align-self:flex-end;font-size:30px;color:#8a8a92;margin-top:10px}
+  #input{position:absolute;left:48px;right:48px;bottom:330px;height:96px;border-radius:48px;border:2px solid #2a2a30;display:flex;align-items:center;padding:0 36px;font-size:40px;color:#5d5d66}
+  /* end card */
+  #end{position:absolute;inset:0;background:#000;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+  #e1{font-family:"Inter Display",Inter,sans-serif;font-weight:900;font-size:150px;color:#d01b1b;letter-spacing:-3px}
+  #e2{font-size:56px;font-weight:700;margin-top:40px;padding:0 90px;line-height:1.25;color:#eee}
+  #e3{font-size:40px;margin-top:50px;color:#9a9aa2}
+  /* overlays */
+  #tint{position:absolute;inset:0;background:#7a0000;mix-blend-mode:multiply;pointer-events:none}
+  #vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 45%,rgba(0,0,0,.85) 100%);pointer-events:none}
+  #grain{position:absolute;left:0;top:0;width:1080px;height:1920px;mix-blend-mode:screen;opacity:.16;pointer-events:none}
+  #flash{position:absolute;inset:0;background:#fff;pointer-events:none}
+  #scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 2px,transparent 2px 5px)}
+</style></head>
+<body>
+<div id="stage">
+  <div id="phone">
+    <div id="status"><span id="clock">3:12</span><span>▂▄▆ 9%</span></div>
+    <div id="header"><div id="avatar">M</div><div id="name">Maddie</div></div>
+    <div id="part">PART 1</div>
+    <div id="msgs"></div>
+    <div id="input">Text Message</div>
+  </div>
+  <div id="hook"><div class="hk" id="hk1">If they smile<br>at you</div><div class="hk" id="hk2">it's already<br>too late.</div></div>
+  <div id="end"><div id="e1">PART 2?</div><div id="e2">What did Maddie<br>let in?</div><div id="e3">Follow so you don't miss it.</div></div>
+</div>
+<canvas id="grain" width="540" height="960"></canvas>
+<div id="scan"></div><div id="tint"></div><div id="vig"></div><div id="flash"></div>
+<script>
+// Timeline (seconds). Shared with audio.py via timeline.json.
+const T = {
+  hookEnd: 3.2, end: 47.0, endCard: 42.6,
+  msgs: [
+    [4.0,'out','where are you'],
+    [5.8,'in','gas station on route 9. hiding in the cooler'],
+    [8.0,'in','the cashier is still out there. laughing'],
+    [10.2,'out',"don't make a sound. i'm 5 min away"],
+    [12.8,'in',"there's blood on the glass"],
+    [14.6,'in',"he's drawing smiley faces in it"],
+    [17.2,'in',"ok he's gone"],
+    [18.6,'in','wait'],
+    [21.4,'in',"someone's knocking"],
+    [23.0,'in',"it's you right?? you said 5 min"],
+    [25.2,'out',"i'm still 3 min out"],
+    [27.4,'in',"they're saying my name"],
+    [29.2,'in','it sounds exactly like you'],
+    [32.2,'in',"it says it's safe now. it says open up"],
+    [34.6,'in',"i'm opening it"],
+    [36.0,'out panic','MADDIE NO'],
+    [36.8,'out panic',"DON'T"],
+    [41.8,'in emoji','🙂'],
+  ],
+  read: 38.0,
+  typingFinal: [39.0, 41.8],
+  knocks: [19.4,19.8,20.2, 30.4,30.8,31.2],
+  sting: 41.8,
+};
+window.TIMELINE = T;
+
+const $ = id => document.getElementById(id);
+const msgsEl = $('msgs');
+// build message elements once
+const els = T.msgs.map(([t,cls,txt]) => { const d=document.createElement('div'); d.className='m '+cls; d.textContent=txt; msgsEl.appendChild(d); return {t,cls,el:d}; });
+const typing = document.createElement('div'); typing.className='typing'; typing.innerHTML='<i></i><i></i><i></i>'; msgsEl.appendChild(typing);
+const read = document.createElement('div'); read.className='read'; read.textContent='Read 3:14 AM'; msgsEl.insertBefore(read, els[17].el);
+
+function rng(seed){ let s=seed>>>0; return ()=>{ s=(s*1664525+1013904223)>>>0; return s/4294967296; }; }
+const clamp=(x,a,b)=>Math.min(b,Math.max(a,x));
+const ease=x=>1-Math.pow(1-clamp(x,0,1),3);
+const gctx=$('grain').getContext('2d'); const gimg=gctx.createImageData(540,960);
+
+window.render = function(t){
+  const frame=Math.round(t*30), r=rng(frame*7919+13);
+  // --- hook card
+  const hook=$('hook');
+  hook.style.display = t<T.hookEnd ? 'flex':'none';
+  $('hk1').style.opacity = t>0.15 ? 1:0;
+  $('hk2').style.opacity = t>1.3 ? 1:0;
+  // --- messages: show those with time <= t, pop-in
+  let lastIdx=-1;
+  els.forEach((m,i)=>{
+    const vis=t>=m.t; m.el.style.display=vis?'block':'none';
+    if(vis){ lastIdx=i; const p=ease((t-m.t)/0.18); m.el.style.transform=`scale(${0.85+0.15*p})`; m.el.style.opacity=p; }
+  });
+  // typing indicator: 0.9s before each incoming message, plus the long final one
+  let showTyping=false;
+  els.forEach(m=>{ if(m.cls.startsWith('in') && t>=m.t-0.9 && t<m.t && m.t-0.9>T.hookEnd) showTyping=true; });
+  if(t>=T.typingFinal[0] && t<T.typingFinal[1]) showTyping=true;
+  typing.style.display=showTyping?'flex':'none';
+  // keep typing bubble at the bottom
+  msgsEl.appendChild(typing);
+  [...typing.children].forEach((d,i)=>{ d.style.opacity = 0.35+0.65*Math.max(0,Math.sin((t*6)-i*0.9)); });
+  read.style.display = (t>=T.read && t<T.sting) ? 'block':'none';
+  $('clock').textContent = t<20 ? '3:12' : t<35 ? '3:13' : '3:14';
+  // --- end card
+  $('end').style.display = t>=T.endCard ? 'flex':'none';
+  $('e1').style.opacity = t>=T.endCard+0.6 ? 1:0;
+  $('e2').style.opacity = t>=T.endCard+1.4 ? 1:0;
+  $('e3').style.opacity = t>=T.endCard+2.4 ? 1:0;
+
+  // --- effects
+  // dread builds over the video
+  const dread = clamp((t-3)/38,0,1);
+  let tint = 0.05 + 0.25*dread;
+  let shake = 0, glitch = 0, flash = 0;
+  for(const k of T.knocks){ const d=t-k; if(d>=0&&d<0.25) shake=Math.max(shake,(1-d/0.25)*22); }
+  if(t<T.hookEnd){ const d1=t-0.15, d2=t-1.3; if((d1>=0&&d1<0.2)||(d2>=0&&d2<0.3)) glitch=1; }
+  const ds=t-T.sting;
+  if(ds>=0 && ds<0.8){ glitch=1; shake=30*(1-ds/0.8); tint=0.75; if(ds<0.08) flash=0.6; }
+  if(ds>=0.8) tint=0.0;
+  // slow flicker
+  const flick = (r()<0.04 && t>T.hookEnd) ? 0.75 : 1;
+  const stage=$('stage');
+  const sx=(r()-0.5)*2*shake, sy=(r()-0.5)*2*shake;
+  stage.style.transform=`translate(${sx}px,${sy}px)`;
+  stage.style.filter = glitch ? `contrast(1.6) saturate(1.8) hue-rotate(${(r()-0.5)*40}deg) brightness(${flick})` : `brightness(${flick})`;
+  stage.style.textShadow = glitch ? `${(r()-0.5)*24}px 0 #f00, ${(r()-0.5)*24}px 0 #0ff` : 'none';
+  if(glitch && ds>=0 && ds<0.8){ const e=els[17].el; e.style.transform=`scale(${1+0.25*Math.sin(ds*40)}) translateX(${(r()-0.5)*40}px)`; }
+  $('tint').style.opacity=tint;
+  $('flash').style.opacity=flash;
+  // film grain
+  const d=gimg.data; for(let i=0;i<d.length;i+=4){ const v=r()*255|0; d[i]=d[i+1]=d[i+2]=v; d[i+3]=255; }
+  gctx.putImageData(gimg,0,0);
+};
+render(0);
+</script>
+</body></html>

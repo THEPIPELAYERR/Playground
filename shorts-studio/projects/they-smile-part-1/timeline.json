@@ -1,0 +1,111 @@
+{
+ "hookEnd": 3.2,
+ "end": 47,
+ "endCard": 42.6,
+ "msgs": [
+  [
+   4,
+   "out",
+   "where are you"
+  ],
+  [
+   5.8,
+   "in",
+   "gas station on route 9. hiding in the cooler"
+  ],
+  [
+   8,
+   "in",
+   "the cashier is still out there. laughing"
+  ],
+  [
+   10.2,
+   "out",
+   "don't make a sound. i'm 5 min away"
+  ],
+  [
+   12.8,
+   "in",
+   "there's blood on the glass"
+  ],
+  [
+   14.6,
+   "in",
+   "he's drawing smiley faces in it"
+  ],
+  [
+   17.2,
+   "in",
+   "ok he's gone"
+  ],
+  [
+   18.6,
+   "in",
+   "wait"
+  ],
+  [
+   21.4,
+   "in",
+   "someone's knocking"
+  ],
+  [
+   23,
+   "in",
+   "it's you right?? you said 5 min"
+  ],
+  [
+   25.2,
+   "out",
+   "i'm still 3 min out"
+  ],
+  [
+   27.4,
+   "in",
+   "they're saying my name"
+  ],
+  [
+   29.2,
+   "in",
+   "it sounds exactly like you"
+  ],
+  [
+   32.2,
+   "in",
+   "it says it's safe now. it says open up"
+  ],
+  [
+   34.6,
+   "in",
+   "i'm opening it"
+  ],
+  [
+   36,
+   "out panic",
+   "MADDIE NO"
+  ],
+  [
+   36.8,
+   "out panic",
+   "DON'T"
+  ],
+  [
+   41.8,
+   "in emoji",
+   "🙂"
+  ]
+ ],
+ "read": 38,
+ "typingFinal": [
+  39,
+  41.8
+ ],
+ "knocks": [
+  19.4,
+  19.8,
+  20.2,
+  30.4,
+  30.8,
+  31.2
+ ],
+ "sting": 41.8
+}

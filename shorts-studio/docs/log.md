@@ -1,3 +1,4 @@
 # Log
 | Date | Objective | Tools chosen | Work done | Working pieces | Known errors | Tested fixes | Next step |
 |---|---|---|---|---|---|---|---|
+| 2026-11-12 | First tester Short: "They Smile: Part 1", a text-message horror cliffhanger | Playwright + Chromium (frames from an HTML scene), FFmpeg (encode, loudnorm), Python/numpy (synthesized sound design) | Script in scripts/they-smile-part-1.md; generator in projects/they-smile-part-1/; render in renders/they-smile-part-1.mp4 | Full pipeline renders from code, so it is repeatable for Part 2 | No voice model reachable (huggingface.co blocked), so there is no voiceover; Whisper captions not needed (no speech) | Sound bed got upper harmonics so it is audible on phone speakers; grain canvas fixed to cover the full frame | Chris records VO or a face-cam intro (human-angle rule) before posting; then policy-checker, then cross-poster |
