@@ -1,0 +1,345 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<!-- Tester Short "They Smile - Part 2: The Stare-Down". Deterministic: render.js calls render(t) per frame. -->
+<style>
+  html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#000}
+  canvas{display:block}
+</style></head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script>
+const W = 1080, H = 1920;
+const T = {
+  hookEnd: 2.8, end: 51.0, endCard: 47.0,
+  lightsOn: 8.4,
+  tilt: [11.0, 13.0],
+  blinks: [[24.5, 8.5, 4.6], [32.2, 4.6, 2.3]],   // [time, metres before, metres after]
+  closeUp: [33.0, 34.3],
+  buzz: [37.0, 38.6],
+  notif: 39.2,
+  whisper: 46.0,
+  turn: [46.3, 47.0],
+  caps: [
+    [3.2, 5.4, 'the cooler door was wide open.'],
+    [5.6, 8.2, 'her phone was on the floor. i picked it up.'],
+    [9.0, 11.0, '...maddie?'],
+    [12.0, 14.8, "she's smiling. maddie never smiles like that.", 'red'],
+    [15.0, 17.2, 'you never look away from them.'],
+    [17.4, 19.8, "they're like dogs. look away, they charge."],
+    [20.0, 22.3, 'so we stare.', 'red'],
+    [22.5, 24.4, 'my eyes are burning.'],
+    [25.2, 27.3, 'she moved.', 'red'],
+    [27.5, 29.8, "she's copying my breathing."],
+    [30.0, 32.1, "don't blink. don't blink. don't—"],
+    [34.4, 36.8, 'close enough to hear her humming.'],
+    [37.4, 39.0, 'my phone buzzed.'],
+    [41.6, 43.8, 'a text. from my own number.', 'red'],
+    [44.0, 46.2, "she's right in front of me. so who's behind me?"],
+  ],
+};
+window.TIMELINE = T;
+
+const c = document.getElementById('c'), x = c.getContext('2d');
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, p) => a + (b - a) * p;
+const ease = p => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
+function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+// smooth noise for handheld camera
+function sn(t, seed) { let v = 0; for (let k = 1; k <= 3; k++) v += Math.sin(t * (0.7 * k + seed) + seed * k * 1.7) / k; return v / 1.83; }
+
+// ---- static world (generated once)
+const R0 = rng(42);
+const products = [];
+for (let side of [-1, 1]) for (let z = 1.2; z < 19; z += 0.55) for (let y of [0.15, 0.62, 1.09, 1.56]) {
+  if (R0() < 0.12) continue; // gaps on the shelves
+  const hue = [0, 30, 50, 120, 200, 260, 340][R0() * 7 | 0];
+  products.push({ side, z, y, h: 0.22 + R0() * 0.18, d: 0.35 + R0() * 0.15, hue, sat: 10 + R0() * 22, lit: 13 + R0() * 13 });
+}
+const grains = [];
+for (let g = 0; g < 8; g++) {
+  const gc = document.createElement('canvas'); gc.width = 540; gc.height = 960;
+  const gx = gc.getContext('2d'), im = gx.createImageData(540, 960), r = rng(1000 + g);
+  for (let i = 0; i < im.data.length; i += 4) { const v = r() * 255 | 0; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+  gx.putImageData(im, 0, 0); grains.push(gc);
+}
+
+// ---- camera / projection
+let cam = { vx: 540, vy: 860, f: 900, eye: 1.62 };
+const P = (X, Y, Z) => [cam.vx + X * cam.f / Z, cam.vy - (Y - cam.eye) * cam.f / Z];
+function quad(a, b, cc, d, fill) { x.beginPath(); x.moveTo(...a); x.lineTo(...b); x.lineTo(...cc); x.lineTo(...d); x.closePath(); x.fillStyle = fill; x.fill(); }
+const fog = (z, L) => clamp(L * Math.exp(-z / 9), 0, 1);
+
+function drawAisle(L) {
+  const ZN = 0.6, ZF = 20, AW = 1.15, SH = 2.1;
+  x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+  // back wall (lit, so the figure reads as a silhouette)
+  const bw = fog(ZF, L) * 2.2;
+  const a = P(-AW, 0, ZF), b = P(AW, 2.7, ZF);
+  x.fillStyle = `rgb(${70 * bw | 0},${80 * bw | 0},${72 * bw | 0})`; x.fillRect(a[0], b[1], b[0] - a[0], a[1] - b[1]);
+  // floor
+  for (let z = ZN; z < ZF; z += 0.5) {
+    const k = fog(z, L) * ((Math.floor(z * 2) % 2) ? 1 : 0.88);
+    quad(P(-AW, 0, z), P(AW, 0, z), P(AW, 0, z + 0.5), P(-AW, 0, z + 0.5), `rgb(${46 * k | 0},${50 * k | 0},${46 * k | 0})`);
+  }
+  // ceiling
+  quad(P(-AW, 2.7, ZN), P(AW, 2.7, ZN), P(AW, 2.7, ZF), P(-AW, 2.7, ZF), '#020203');
+  // shelving sides + products
+  for (const side of [-1, 1]) {
+    for (let z = ZN; z < ZF; z += 1) {
+      const k = fog(z, L);
+      quad(P(side * AW, 0, z), P(side * AW, SH, z), P(side * AW, SH, z + 1), P(side * AW, 0, z + 1), `rgb(${22 * k | 0},${23 * k | 0},${26 * k | 0})`);
+    }
+  }
+  // products drawn far to near
+  for (let i = products.length - 1; i >= 0; i--) {
+    const p = products[i]; const k = fog(p.z, L); if (k < 0.01) continue;
+    const X0 = p.side * AW, X1 = p.side * (AW - p.d);
+    // front face of product facing the aisle
+    quad(P(X1, p.y, p.z), P(X1, p.y + p.h, p.z), P(X1, p.y + p.h, p.z + 0.42), P(X1, p.y, p.z + 0.42), `hsl(${p.hue},${p.sat}%,${p.lit * k}%)`);
+  }
+  // shelf lips
+  for (const side of [-1, 1]) for (const y of [0.13, 0.6, 1.07, 1.54, 2.05]) {
+    x.strokeStyle = `rgba(120,125,120,${0.5 * L})`; x.lineWidth = 3;
+    x.beginPath(); x.moveTo(...P(side * (AW - 0.5), y, ZN + 0.2)); x.lineTo(...P(side * (AW - 0.5), y, ZF)); x.stroke();
+  }
+  // fluorescent panels
+  for (let z = 2; z < ZF; z += 3) {
+    const on = L > 0.05;
+    quad(P(-0.25, 2.69, z), P(0.25, 2.69, z), P(0.25, 2.69, z + 1.2), P(-0.25, 2.69, z + 1.2), on ? `rgba(225,240,228,${clamp(L * 1.1, 0, 1)})` : '#0a0a0a');
+  }
+}
+
+// head / face. r = head radius in px. detail 0..1 (0 = silhouette far away). Mostly shadow on purpose.
+function drawHead(cx, cy, r, tilt, detail, lit) {
+  x.save(); x.translate(cx, cy); x.rotate(tilt);
+  const s = clamp(lit * detail, 0, 1);
+  // long hair behind, falling past the shoulders
+  x.fillStyle = '#040303';
+  x.beginPath(); x.moveTo(-r * 0.95, -r * 0.2);
+  x.quadraticCurveTo(-r * 1.15, r * 1.2, -r * 0.9, r * 2.1); x.lineTo(r * 0.9, r * 2.1);
+  x.quadraticCurveTo(r * 1.15, r * 1.2, r * 0.95, -r * 0.2);
+  x.ellipse(0, -r * 0.2, r * 0.95, r * 0.95, 0, 0, Math.PI, true); x.fill();
+  // face: dark, lit only from the fluorescent tube above
+  const g = x.createRadialGradient(0, -r * 0.75, r * 0.05, 0, -r * 0.1, r * 1.15);
+  g.addColorStop(0, `rgb(${16 + 70 * s | 0},${12 + 56 * s | 0},${12 + 52 * s | 0})`);
+  g.addColorStop(0.55, `rgb(${10 + 30 * s | 0},${8 + 23 * s | 0},${8 + 22 * s | 0})`);
+  g.addColorStop(1, '#050404');
+  x.fillStyle = g; x.beginPath(); x.ellipse(0, 0, r * 0.74, r, 0, 0, Math.PI * 2); x.fill();
+  // deep eye sockets
+  for (const sx of [-1, 1]) {
+    const sg = x.createRadialGradient(sx * r * 0.3, -r * 0.12, 0, sx * r * 0.3, -r * 0.12, r * 0.24);
+    sg.addColorStop(0, 'rgba(0,0,0,0.85)'); sg.addColorStop(1, 'rgba(0,0,0,0)');
+    x.fillStyle = sg; x.beginPath(); x.ellipse(sx * r * 0.3, -r * 0.12, r * 0.26, r * 0.2, 0, 0, Math.PI * 2); x.fill();
+  }
+  // eyes: small, wide open, never blinking
+  for (const sx of [-1, 1]) {
+    const ex = sx * r * 0.3, ey = -r * 0.13;
+    x.fillStyle = `rgba(205,195,172,${0.35 + 0.6 * detail})`;
+    x.beginPath(); x.ellipse(ex, ey, r * 0.105, r * 0.07, 0, 0, Math.PI * 2); x.fill();
+    if (detail > 0.3) {
+      x.save(); x.clip();
+      x.strokeStyle = `rgba(150,20,20,${0.35 * detail})`; x.lineWidth = Math.max(1, r * 0.005);
+      for (let v = 0; v < 4; v++) { const a = v / 6 * Math.PI * 2; x.beginPath(); x.moveTo(ex + Math.cos(a) * r * 0.11, ey + Math.sin(a) * r * 0.07); x.lineTo(ex + Math.cos(a + 0.4) * r * 0.05, ey + Math.sin(a + 0.4) * r * 0.03); x.stroke(); }
+      x.restore();
+      x.fillStyle = '#0d0806'; x.beginPath(); x.arc(ex + sx * r * 0.008, ey, r * 0.05, 0, Math.PI * 2); x.fill();
+      x.fillStyle = '#000'; x.beginPath(); x.arc(ex, ey, r * 0.016, 0, Math.PI * 2); x.fill();
+      x.fillStyle = `rgba(255,255,255,${0.9 * detail})`; x.beginPath(); x.arc(ex - r * 0.018, ey - r * 0.02, r * 0.01, 0, Math.PI * 2); x.fill();
+    }
+  }
+  // smile creases cutting up into the cheeks
+  if (detail > 0.2) {
+    x.strokeStyle = `rgba(0,0,0,${0.8 * detail})`; x.lineWidth = Math.max(1, r * 0.022); x.lineCap = 'round';
+    for (const sx of [-1, 1]) { x.beginPath(); x.moveTo(sx * r * 0.66, r * 0.22); x.quadraticCurveTo(sx * r * 0.62, r * 0.0, sx * r * 0.44, -r * 0.03); x.stroke(); }
+  }
+  // the grin: far too wide, teeth catching the light
+  x.beginPath();
+  x.moveTo(-r * 0.68, r * 0.2);
+  x.quadraticCurveTo(0, r * 0.46, r * 0.68, r * 0.2);
+  x.quadraticCurveTo(0, r * 0.98, -r * 0.68, r * 0.2);
+  x.closePath();
+  const tg = x.createLinearGradient(-r * 0.68, 0, r * 0.68, 0);
+  const tc = `rgba(${190 + 30 * detail | 0},${180 + 25 * detail | 0},${150 + 20 * detail | 0},1)`;
+  tg.addColorStop(0, '#1a1410'); tg.addColorStop(0.2, tc); tg.addColorStop(0.8, tc); tg.addColorStop(1, '#1a1410');
+  x.fillStyle = tg; x.fill();
+  if (detail > 0.25) {
+    x.save(); x.clip();
+    x.strokeStyle = `rgba(30,15,10,${0.85 * detail})`; x.lineWidth = Math.max(1, r * 0.012);
+    for (let i = -8; i <= 8; i++) { const tx = i * r * 0.078; x.beginPath(); x.moveTo(tx, r * 0.2); x.lineTo(tx * 0.95, r * 0.98); x.stroke(); }
+    x.lineWidth = Math.max(1, r * 0.02);
+    x.beginPath(); x.moveTo(-r * 0.72, r * 0.2); x.quadraticCurveTo(0, r * 0.72, r * 0.72, r * 0.2); x.stroke();
+    x.fillStyle = `rgba(110,8,8,${0.65 * detail})`;           // stained gum line
+    x.beginPath(); x.moveTo(-r * 0.68, r * 0.2); x.quadraticCurveTo(0, r * 0.46, r * 0.68, r * 0.2); x.quadraticCurveTo(0, r * 0.56, -r * 0.68, r * 0.2); x.fill();
+    x.restore();
+  }
+  // strands of hair across the face
+  x.strokeStyle = '#040303'; x.lineWidth = Math.max(2, r * 0.07); x.lineCap = 'round';
+  for (const [sx, o] of [[-1, 0.15], [1, 0.25], [1, 0.05]]) { x.beginPath(); x.moveTo(sx * r * o, -r * 0.98); x.quadraticCurveTo(sx * r * (0.6 + o), -r * 0.45, sx * r * (0.55 + o), r * 1.0); x.stroke(); }
+  x.fillStyle = '#040303'; x.beginPath(); x.ellipse(0, -r * 0.86, r * 0.78, r * 0.3, 0, Math.PI, Math.PI * 2); x.fill();
+  x.restore();
+}
+
+function drawFigure(Z, tilt, breath, L) {
+  const s = cam.f / Z; // px per metre
+  const [fx, fy] = P(0, 0, Z);
+  const X = m => fx + m * s, Y = m => fy - m * s;
+  const sh = breath * 0.025;
+  x.save();
+  // faint rim light + soft edges so she reads against the aisle
+  x.shadowColor = `rgba(170,200,175,${0.5 * L})`; x.shadowBlur = Math.max(6, 0.07 * s);
+  x.filter = `blur(${Math.max(0.5, 0.004 * s).toFixed(1)}px)`;
+  x.fillStyle = '#060606'; x.strokeStyle = '#060606'; x.lineCap = 'round';
+  // thin legs
+  for (const sd of [-1, 1]) {
+    x.beginPath(); x.moveTo(X(sd * 0.03), Y(0.55)); x.lineTo(X(sd * 0.13), Y(0.55)); x.lineTo(X(sd * 0.1), Y(0.0)); x.lineTo(X(sd * 0.05), Y(0.0)); x.closePath(); x.fill();
+  }
+  // slumped body in a long hoodie / dress
+  x.beginPath();
+  x.moveTo(X(-0.06), Y(1.5 + sh));
+  x.quadraticCurveTo(X(-0.24), Y(1.47 + sh), X(-0.24), Y(1.3 + sh));
+  x.quadraticCurveTo(X(-0.2), Y(1.0), X(-0.27), Y(0.5));
+  x.quadraticCurveTo(X(0), Y(0.46), X(0.27), Y(0.5));
+  x.quadraticCurveTo(X(0.2), Y(1.0), X(0.24), Y(1.3 + sh));
+  x.quadraticCurveTo(X(0.24), Y(1.47 + sh), X(0.06), Y(1.5 + sh));
+  x.closePath(); x.fill();
+  // arms hanging too long, fingers past the knees
+  x.lineWidth = 0.06 * s;
+  for (const sd of [-1, 1]) {
+    x.beginPath(); x.moveTo(X(sd * 0.21), Y(1.38 + sh)); x.quadraticCurveTo(X(sd * 0.3), Y(0.95), X(sd * 0.26), Y(0.4)); x.stroke();
+    x.lineWidth = 0.018 * s;
+    for (const f of [-1, 0, 1]) { x.beginPath(); x.moveTo(X(sd * 0.26), Y(0.42)); x.lineTo(X(sd * 0.26 + f * 0.015), Y(0.3)); x.stroke(); }
+    x.lineWidth = 0.06 * s;
+  }
+  x.restore();
+  // head
+  const detail = clamp(1.6 / Z - 0.1, 0, 1);
+  drawHead(X(Math.sin(tilt) * 0.08), Y(1.63 + sh), 0.11 * s, tilt, detail, L);
+}
+
+function caption(txt, alpha, red) {
+  x.save(); x.globalAlpha = alpha; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.font = '800 66px Inter, "DejaVu Sans", sans-serif';
+  // wrap
+  const words = txt.split(' '), lines = []; let cur = '';
+  for (const w of words) { const tr = cur ? cur + ' ' + w : w; if (x.measureText(tr).width > 900) { lines.push(cur); cur = w; } else cur = tr; }
+  lines.push(cur);
+  lines.forEach((ln, i) => {
+    const y = 1290 + (i - (lines.length - 1) / 2) * 82;
+    x.lineWidth = 14; x.strokeStyle = 'rgba(0,0,0,0.9)'; x.lineJoin = 'round'; x.strokeText(ln, 540, y);
+    x.fillStyle = red ? '#ff2a2a' : '#fff'; x.fillText(ln, 540, y);
+  });
+  x.restore();
+}
+
+function bigText(lines, y0, size, colors, alpha) {
+  x.save(); x.globalAlpha = alpha; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.font = `900 ${size}px "Inter Display", Inter, sans-serif`;
+  lines.forEach((ln, i) => {
+    const y = y0 + i * size * 1.02;
+    x.lineWidth = 16; x.strokeStyle = 'rgba(0,0,0,0.85)'; x.lineJoin = 'round'; x.strokeText(ln, 540, y);
+    x.fillStyle = colors[i]; x.fillText(ln, 540, y);
+  });
+  x.restore();
+}
+
+function notification(p) {
+  const y = lerp(-260, 110, ease(p));
+  x.save();
+  x.fillStyle = 'rgba(38,38,44,0.96)'; x.beginPath(); x.roundRect(50, y, 980, 200, 44); x.fill();
+  x.fillStyle = '#34c759'; x.beginPath(); x.roundRect(90, y + 40, 96, 96, 24); x.fill();
+  x.fillStyle = '#fff'; x.beginPath(); x.ellipse(138, y + 86, 30, 24, 0, 0, Math.PI * 2); x.fill();
+  x.fillStyle = '#ddd'; x.font = '600 34px Inter, sans-serif'; x.textBaseline = 'alphabetic';
+  x.fillText('MESSAGES', 220, y + 66); x.fillStyle = '#999'; x.fillText('now', 930, y + 66);
+  x.fillStyle = '#fff'; x.font = '700 44px Inter, sans-serif'; x.fillText('Me (My Number)', 220, y + 120);
+  x.font = '400 44px Inter, "Noto Color Emoji", sans-serif'; x.fillText('look behind you 🙂', 220, y + 172);
+  x.restore();
+}
+
+window.render = function (t) {
+  const frame = Math.round(t * 30), r = rng(frame * 7919 + 13);
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.filter = 'none';
+  x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+
+  // ---- light level: dark -> flicker on at lightsOn -> occasional flicker after
+  let L;
+  if (t < T.lightsOn) L = 0.1 + 0.05 * (r() < 0.1 ? 1 : 0);
+  else { const d = t - T.lightsOn; L = d < 0.6 ? ((d * 20 | 0) % 3 === 0 ? 0.1 : 0.9) : 0.85; if (r() < 0.035) L = 0.25; }
+
+  // ---- figure distance (as meters along the aisle)
+  // she starts at the far end and jumps closer during each blink (while the eyes are shut)
+  let Z = 8.5;
+  for (const [bt, , to] of T.blinks) if (t >= bt + 0.1) Z = to;
+  const tilt = 0.42 * ease((t - T.tilt[0]) / (T.tilt[1] - T.tilt[0])) + 0.03 * Math.sin(t * 0.9);
+  const breath = Math.sin(t * 2 * Math.PI / 3.2);
+
+  // ---- camera: handheld, slow push-in while staring, small kick when the phone buzzes
+  const shakeAmt = 6 + 10 * clamp((t - 20) / 26, 0, 1);
+  let push = 1 + 0.18 * ease((t - 20) / 26);
+  cam.vx = 540 + sn(t * 1.3, 1) * shakeAmt; cam.vy = 860 + sn(t * 1.1, 2) * shakeAmt * 0.8;
+  if (t >= T.buzz[0] && t < T.buzz[1]) { cam.vx += (r() - 0.5) * 8; cam.vy += (r() - 0.5) * 8; }
+  cam.f = 900 * push;
+
+  const isHook = t < T.hookEnd;
+  const isClose = t >= T.closeUp[0] && t < T.closeUp[1];
+  const isEnd = t >= T.endCard;
+
+  if (isHook || isClose) {
+    // extreme close-up of the grin
+    const g = x.createRadialGradient(540, 900, 50, 540, 900, 900);
+    g.addColorStop(0, '#1a1614'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+    const k = isHook ? 1 + 0.06 * t : 1 + 0.15 * (t - T.closeUp[0]);
+    drawHead(540 + sn(t * 2, 3) * 10, 980 + sn(t * 2, 4) * 10, 560 * k, isHook ? 0.25 : tilt, 1, 0.42);
+    { const vg = x.createRadialGradient(540, 1000, 250, 540, 1000, 1000); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.9)'); x.fillStyle = vg; x.fillRect(0, 0, W, H); }
+    if (isHook) {
+      bigText(["SHE HASN'T", 'STOPPED SMILING'], 300, 104, ['#fff', '#fff'], t > 0.15 ? 1 : 0);
+      bigText(['IN 4 MINUTES.'], 1560, 120, ['#ff2a2a'], t > 1.2 ? 1 : 0);
+    }
+  } else if (!isEnd) {
+    drawAisle(L);
+    drawFigure(Z, tilt, breath, L);
+    // PART 2 tag
+    x.save(); x.strokeStyle = '#d01b1b'; x.lineWidth = 4; x.fillStyle = '#d01b1b'; x.font = '800 32px Inter, sans-serif';
+    x.strokeRect(830, 70, 190, 58); x.textBaseline = 'middle'; x.textAlign = 'center'; x.fillText('PART 2', 925, 100); x.restore();
+    // captions
+    for (const [a, b, txt, col] of T.caps) if (t >= a && t < b) caption(txt, clamp((t - a) / 0.12, 0, 1) * clamp((b - t) / 0.12, 0, 1), col === 'red');
+    // notification
+    if (t >= T.notif && t < T.turn[0]) notification((t - T.notif) / 0.35);
+    // whip-pan as he starts to turn around
+    if (t >= T.turn[0]) {
+      const p = (t - T.turn[0]) / (T.turn[1] - T.turn[0]);
+      const img = x.getImageData(0, 0, W, H); x.putImageData(img, -p * 1200, 0);
+      x.fillStyle = `rgba(0,0,0,${p})`; x.fillRect(0, 0, W, H);
+    }
+  } else {
+    // end card
+    x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+    bigText(['PART 3?'], 760, 150, ['#ff2a2a'], t >= T.endCard + 0.4 ? 1 : 0);
+    x.save(); x.textAlign = 'center'; x.fillStyle = '#eee'; x.font = '700 58px Inter, sans-serif';
+    x.globalAlpha = t >= T.endCard + 1.2 ? 1 : 0; x.fillText('Turn around,', 540, 960); x.fillText('or keep staring?', 540, 1035);
+    x.globalAlpha = t >= T.endCard + 2.2 ? 1 : 0; x.fillStyle = '#9a9aa2'; x.font = '600 44px Inter, sans-serif';
+    x.fillText('Comment TURN or STARE', 540, 1180); x.restore();
+  }
+
+  // ---- blinks: eyelids close and open
+  for (const [bt] of T.blinks) {
+    const d = t - bt;
+    if (d >= -0.08 && d < 0.2) {
+      const cl = d < 0.1 ? ease((d + 0.08) / 0.18) : 1 - ease((d - 0.1) / 0.1);
+      const hgt = cl * H / 2;
+      x.fillStyle = '#000'; x.fillRect(0, 0, W, hgt); x.fillRect(0, H - hgt, W, hgt);
+    }
+  }
+
+  // ---- color grade: red creeps in, sting flashes
+  const dread = clamp((t - 3) / 40, 0, 1);
+  if (!isEnd) { x.fillStyle = `rgba(120,0,0,${0.06 + 0.22 * dread})`; x.globalCompositeOperation = 'multiply'; x.fillRect(0, 0, W, H); x.globalCompositeOperation = 'source-over'; }
+  for (const [bt] of T.blinks) { const d = t - bt - 0.1; if (d >= 0 && d < 0.5) { x.fillStyle = `rgba(200,0,0,${0.35 * (1 - d / 0.5)})`; x.fillRect(0, 0, W, H); } }
+  // vignette
+  const v = x.createRadialGradient(540, 960, 400, 540, 960, 1150);
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.85)'); x.fillStyle = v; x.fillRect(0, 0, W, H);
+  // scanlines + grain
+  x.globalAlpha = 0.14; x.globalCompositeOperation = 'screen'; x.drawImage(grains[frame % 8], 0, 0, W, H);
+  x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1;
+};
+render(0);
+</script>
+</body></html>

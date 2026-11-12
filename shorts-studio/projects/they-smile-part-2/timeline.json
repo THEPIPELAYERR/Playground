@@ -1,0 +1,117 @@
+{
+ "hookEnd": 2.8,
+ "end": 51,
+ "endCard": 47,
+ "lightsOn": 8.4,
+ "tilt": [
+  11,
+  13
+ ],
+ "blinks": [
+  [
+   24.5,
+   8.5,
+   4.6
+  ],
+  [
+   32.2,
+   4.6,
+   2.3
+  ]
+ ],
+ "closeUp": [
+  33,
+  34.3
+ ],
+ "buzz": [
+  37,
+  38.6
+ ],
+ "notif": 39.2,
+ "whisper": 46,
+ "turn": [
+  46.3,
+  47
+ ],
+ "caps": [
+  [
+   3.2,
+   5.4,
+   "the cooler door was wide open."
+  ],
+  [
+   5.6,
+   8.2,
+   "her phone was on the floor. i picked it up."
+  ],
+  [
+   9,
+   11,
+   "...maddie?"
+  ],
+  [
+   12,
+   14.8,
+   "she's smiling. maddie never smiles like that.",
+   "red"
+  ],
+  [
+   15,
+   17.2,
+   "you never look away from them."
+  ],
+  [
+   17.4,
+   19.8,
+   "they're like dogs. look away, they charge."
+  ],
+  [
+   20,
+   22.3,
+   "so we stare.",
+   "red"
+  ],
+  [
+   22.5,
+   24.4,
+   "my eyes are burning."
+  ],
+  [
+   25.2,
+   27.3,
+   "she moved.",
+   "red"
+  ],
+  [
+   27.5,
+   29.8,
+   "she's copying my breathing."
+  ],
+  [
+   30,
+   32.1,
+   "don't blink. don't blink. don't—"
+  ],
+  [
+   34.4,
+   36.8,
+   "close enough to hear her humming."
+  ],
+  [
+   37.4,
+   39,
+   "my phone buzzed."
+  ],
+  [
+   41.6,
+   43.8,
+   "a text. from my own number.",
+   "red"
+  ],
+  [
+   44,
+   46.2,
+   "she's right in front of me. so who's behind me?"
+  ]
+ ]
+}
