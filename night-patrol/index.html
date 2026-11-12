@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Night Patrol</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; touch-action: none;
+    font-family: -apple-system, system-ui, sans-serif; color: #eee; user-select: none; -webkit-user-select: none; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+  #hud { position: fixed; left: 0; right: 0; top: 0; display: flex; justify-content: space-between;
+    padding: max(10px, env(safe-area-inset-top)) 14px 0; font-weight: 700; font-size: 15px; pointer-events: none;
+    text-shadow: 0 1px 3px #000; }
+  #bat { width: 70px; height: 14px; border: 2px solid #ccc; border-radius: 3px; display: inline-block; vertical-align: middle; position: relative; }
+  #batfill { position: absolute; inset: 1px; background: #8f6; border-radius: 1px; }
+  #screen { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; background: rgba(0,0,0,.82); padding: 24px; }
+  #screen h1 { font-size: 34px; margin: 0 0 6px; letter-spacing: 2px; color: #ffd76a; }
+  #screen p { max-width: 340px; color: #bbb; line-height: 1.45; margin: 6px 0; }
+  #screen button { margin-top: 18px; font: inherit; font-size: 18px; font-weight: 700; padding: 14px 34px;
+    border: 0; border-radius: 12px; background: #ffd76a; color: #111; }
+  #toast { position: fixed; left: 50%; top: 22%; transform: translateX(-50%); font-weight: 800; font-size: 22px;
+    pointer-events: none; opacity: 0; transition: opacity .25s; text-shadow: 0 2px 6px #000; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud">
+  <span id="score">Caught: 0</span>
+  <span id="lives">🚨🚨🚨</span>
+  <span><span id="bat"><span id="batfill"></span></span></span>
+</div>
+<div id="toast"></div>
+<div id="screen">
+  <h1>NIGHT PATROL</h1>
+  <p>It's 3 AM. Something's moving in the warehouse.</p>
+  <p>Drag your finger to aim the flashlight. Hold the light on an intruder until they're caught.</p>
+  <p>Glowing eyes in the dark are a hint, but some of them are just the warehouse cat. 🐈‍⬛</p>
+  <p>Your battery drains, so grab 🔋 when you spot one. Let 3 intruders escape and your shift is over.</p>
+  <button id="go">Start shift</button>
+</div>
+<script>
+const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const dark = document.createElement('canvas'), dctx = dark.getContext('2d');
+let W, H, DPR;
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  for (const c of [cv, dark]) { c.width = W * DPR; c.height = H * DPR; }
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); dctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  buildWarehouse();
+}
+let crates = [];
+function buildWarehouse() {
+  crates = [];
+  const n = Math.round(W * H / 26000);
+  for (let i = 0; i < n; i++) {
+    const w = 40 + Math.random() * 70, h = 40 + Math.random() * 60;
+    crates.push({ x: Math.random() * (W - w), y: 60 + Math.random() * (H - h - 60), w, h, shade: 40 + Math.random() * 30 });
+  }
+}
+addEventListener('resize', resize);
+
+const light = { x: 0, y: 0, on: false };
+function aim(e) {
+  const t = e.touches ? e.touches[0] : e;
+  if (!t) return;
+  light.x = t.clientX; light.y = t.clientY - 40; // shine just above the finger so you can see
+  light.on = true;
+}
+cv.addEventListener('touchstart', e => { e.preventDefault(); aim(e); }, { passive: false });
+cv.addEventListener('touchmove', e => { e.preventDefault(); aim(e); }, { passive: false });
+cv.addEventListener('touchend', () => { light.on = false; });
+cv.addEventListener('mousemove', aim);
+cv.addEventListener('mouseleave', () => { light.on = false; });
+
+let things, score, lives, battery, t, spawnT, running, lastTime, popups;
+function reset() {
+  things = []; popups = []; score = 0; lives = 3; battery = 1; t = 0; spawnT = 1; running = true;
+  hud();
+}
+
+function spawn() {
+  const level = Math.min(score / 8, 4);
+  const roll = Math.random();
+  const kind = roll < 0.12 && battery < 0.8 ? 'battery' : roll < 0.32 ? 'cat' : 'intruder';
+  const x = 30 + Math.random() * (W - 60), y = 90 + Math.random() * (H - 150);
+  const ang = Math.random() * Math.PI * 2;
+  const speed = kind === 'intruder' ? 18 + level * 12 : kind === 'cat' ? 45 : 0;
+  things.push({ kind, x, y, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed,
+    life: kind === 'battery' ? 7 : 7.5 - level, age: 0, lit: 0, blink: Math.random() * 5,
+    need: kind === 'intruder' ? 0.7 + level * 0.12 : 0.45 });
+}
+
+function radius() { return 55 + 75 * Math.max(battery, 0.15); }
+
+function update(dt) {
+  t += dt;
+  battery -= dt * (light.on ? 0.022 : 0.008);
+  if (battery <= 0) { battery = 0; return end('Your flashlight died.'); }
+  spawnT -= dt;
+  if (spawnT <= 0) { spawn(); spawnT = Math.max(0.7, 2.2 - score * 0.06) * (0.7 + Math.random() * 0.6); }
+  const R = radius();
+  for (const o of things) {
+    o.age += dt; o.blink -= dt;
+    if (o.blink < -0.15) o.blink = 2 + Math.random() * 4;
+    o.x += o.vx * dt; o.y += o.vy * dt;
+    if (o.x < 20 || o.x > W - 20) o.vx *= -1;
+    if (o.y < 80 || o.y > H - 30) o.vy *= -1;
+    const inLight = light.on && Math.hypot(o.x - light.x, o.y - light.y) < R * 0.85;
+    o.lit = inLight ? o.lit + dt : Math.max(0, o.lit - dt * 0.6);
+    if (inLight && o.kind === 'cat' && o.lit > 0.1) { o.vx *= 1 + dt * 3; o.vy *= 1 + dt * 3; } // cat bolts
+    if (o.lit >= o.need) {
+      o.dead = true;
+      if (o.kind === 'intruder') { score++; pop(o, 'CAUGHT!', '#7f6'); flash('#7f6'); }
+      else if (o.kind === 'cat') { pop(o, 'just the cat…', '#9cf'); }
+      else { battery = Math.min(1, battery + 0.45); pop(o, '+BATTERY', '#ffd76a'); }
+    } else if (o.age > o.life) {
+      o.dead = true;
+      if (o.kind === 'intruder') { lives--; pop(o, 'ESCAPED', '#f55'); flash('#f33'); if (lives <= 0) return end('Too many got away.'); }
+    }
+  }
+  things = things.filter(o => !o.dead);
+  popups.forEach(p => { p.age += dt; p.y -= dt * 30; });
+  popups = popups.filter(p => p.age < 1.2);
+  hud();
+}
+
+function pop(o, text, color) { popups.push({ x: o.x, y: o.y - 30, text, color, age: 0 }); }
+let flashColor = null, flashT = 0;
+function flash(c) { flashColor = c; flashT = 0.25; }
+
+function drawFigure(o) {
+  const s = o.kind === 'cat' ? 0.55 : 1;
+  ctx.save(); ctx.translate(o.x, o.y); ctx.scale(s, s);
+  if (o.kind === 'battery') {
+    ctx.fillStyle = '#ffd76a'; ctx.fillRect(-10, -16, 20, 32); ctx.fillRect(-4, -21, 8, 5);
+    ctx.fillStyle = '#5a3'; ctx.fillRect(-7, -2, 14, 15);
+  } else if (o.kind === 'cat') {
+    ctx.fillStyle = '#222';
+    ctx.beginPath(); ctx.ellipse(0, 10, 26, 16, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(0, -12, 15, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-13, -20); ctx.lineTo(-8, -36); ctx.lineTo(-2, -24); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(13, -20); ctx.lineTo(8, -36); ctx.lineTo(2, -24); ctx.fill();
+    ctx.strokeStyle = '#222'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(24, 12); ctx.quadraticCurveTo(44, 0, 38, -18); ctx.stroke();
+  } else {
+    ctx.fillStyle = '#1c1c22';
+    ctx.beginPath(); ctx.arc(0, -26, 14, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-20, 26); ctx.lineTo(-16, -10); ctx.quadraticCurveTo(0, -16, 16, -10); ctx.lineTo(20, 26); ctx.fill();
+    ctx.fillStyle = '#2a2a33'; ctx.fillRect(-14, -36, 28, 8); // beanie
+  }
+  ctx.restore();
+}
+
+function draw() {
+  // the warehouse, fully lit
+  ctx.fillStyle = '#2b2a27'; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.lineWidth = 1;
+  for (let x = 0; x < W; x += 48) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 48) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  for (const c of crates) {
+    ctx.fillStyle = `rgb(${c.shade + 50},${c.shade + 30},${c.shade})`; ctx.fillRect(c.x, c.y, c.w, c.h);
+    ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 3; ctx.strokeRect(c.x + 4, c.y + 4, c.w - 8, c.h - 8);
+    ctx.beginPath(); ctx.moveTo(c.x + 4, c.y + 4); ctx.lineTo(c.x + c.w - 4, c.y + c.h - 4); ctx.stroke();
+  }
+  things.forEach(drawFigure);
+
+  // darkness with a flashlight hole
+  dctx.globalCompositeOperation = 'source-over';
+  dctx.clearRect(0, 0, W, H);
+  dctx.fillStyle = 'rgba(2,3,8,.97)'; dctx.fillRect(0, 0, W, H);
+  if (light.on) {
+    const R = radius(), flick = battery < 0.2 && Math.random() < 0.15 ? 0.6 : 1;
+    const g = dctx.createRadialGradient(light.x, light.y, R * 0.15, light.x, light.y, R * flick);
+    g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(0.7, 'rgba(0,0,0,.85)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    dctx.globalCompositeOperation = 'destination-out';
+    dctx.fillStyle = g; dctx.beginPath(); dctx.arc(light.x, light.y, R, 0, Math.PI * 2); dctx.fill();
+  }
+  ctx.drawImage(dark, 0, 0, W, H);
+  if (light.on) { // warm tint
+    const R = radius();
+    const g = ctx.createRadialGradient(light.x, light.y, 0, light.x, light.y, R);
+    g.addColorStop(0, 'rgba(255,230,160,.18)'); g.addColorStop(1, 'rgba(255,230,160,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(light.x, light.y, R, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // eyes glow through the dark (cats and intruders look alike)
+  for (const o of things) {
+    if (o.kind === 'battery' || o.blink < 0) continue;
+    const s = o.kind === 'cat' ? 0.55 : 1, ey = o.kind === 'cat' ? o.y - 12 * s : o.y - 26;
+    const gap = o.kind === 'cat' ? 4 : 5;
+    ctx.fillStyle = `rgba(255,220,120,${o.lit > 0 ? 0.9 : 0.55})`;
+    ctx.beginPath(); ctx.arc(o.x - gap, ey, 2, 0, Math.PI * 2); ctx.arc(o.x + gap, ey, 2, 0, Math.PI * 2); ctx.fill();
+    if (o.lit > 0) { // catch progress ring
+      ctx.strokeStyle = o.kind === 'intruder' ? '#7f6' : o.kind === 'cat' ? '#9cf' : '#ffd76a';
+      ctx.lineWidth = 3; ctx.beginPath();
+      ctx.arc(o.x, o.y - 5, 34 * s + 6, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.min(1, o.lit / o.need));
+      ctx.stroke();
+    }
+  }
+  for (const p of popups) {
+    ctx.globalAlpha = 1 - p.age / 1.2; ctx.fillStyle = p.color; ctx.font = '800 16px system-ui';
+    ctx.textAlign = 'center'; ctx.fillText(p.text, p.x, p.y); ctx.globalAlpha = 1;
+  }
+  if (flashT > 0) { ctx.fillStyle = flashColor; ctx.globalAlpha = flashT; ctx.fillRect(0, 0, W, H); ctx.globalAlpha = 1; }
+}
+
+function loop(now) {
+  const dt = Math.min(0.05, (now - (lastTime || now)) / 1000); lastTime = now;
+  if (running) update(dt);
+  flashT = Math.max(0, flashT - dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function hud() {
+  document.getElementById('score').textContent = 'Caught: ' + score;
+  document.getElementById('lives').textContent = '🚨'.repeat(Math.max(lives, 0)) + '▫️'.repeat(3 - Math.max(lives, 0));
+  const f = document.getElementById('batfill');
+  f.style.width = `calc(${battery * 100}% - 2px)`;
+  f.style.background = battery > 0.5 ? '#8f6' : battery > 0.2 ? '#fc4' : '#f44';
+}
+
+let best = 0;
+try { best = +localStorage.getItem('np-best') || 0; } catch (e) {}
+function end(reason) {
+  running = false;
+  if (score > best) { best = score; try { localStorage.setItem('np-best', best); } catch (e) {} }
+  const rank = score >= 30 ? 'Head of Security' : score >= 18 ? 'Night Lead' : score >= 8 ? 'Officer' : 'Rookie';
+  const s = document.getElementById('screen');
+  s.innerHTML = `<h1>SHIFT OVER</h1><p>${reason}</p><p style="font-size:22px;color:#eee"><b>${score}</b> intruders caught</p>
+    <p>Rank: <b style="color:#ffd76a">${rank}</b> · Best: ${best}</p><button id="go">Clock back in</button>`;
+  s.style.display = 'flex';
+  document.getElementById('go').onclick = start;
+}
+function start() { document.getElementById('screen').style.display = 'none'; reset(); }
+document.getElementById('go').onclick = start;
+
+resize(); reset(); running = false;
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
