@@ -22,6 +22,7 @@ def test_ranks_most_volatile_first_and_filters():
     assert [s.ticker for s in ranked] == ["WILD", "MID", "CALM"]
     assert any("PENNY" in d for d in dropped) and any("THIN" in d for d in dropped)
     assert ranked[0].vol_annual > 80 and ranked[-1].vol_annual < 15
+    assert ranked[0].vol_6m > ranked[1].vol_6m and ranked[0].range_6m > 100
 
 
 def test_fixed_sim_math():
@@ -40,6 +41,7 @@ def test_rotate_sim_runs_and_buys_volatile():
 
 def test_cli_end_to_end(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(volfinder, "download", lambda t, d: DATA)
+    monkeypatch.setattr(volfinder, "discover", lambda *a: ["WILD"])
     assert volfinder.main(["--html", str(tmp_path / "r.html"), "--csv", str(tmp_path / "r.csv")]) == 0
     out = capsys.readouterr().out
     assert "Today's pick: WILD" in out

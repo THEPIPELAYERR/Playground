@@ -18,30 +18,36 @@ Price data comes free from Yahoo Finance through `yfinance`, so you don't need a
 ## Find volatile stocks
 
 ```bash
-python volfinder.py                       # scan ~110 known high-volatility tickers
-python volfinder.py --top 10 --days 30    # top 10 over the last 30 trading days
+python volfinder.py                       # whole US market: ~1,700 stocks, about 3 minutes
+python volfinder.py --quick               # only the built-in list of ~100 volatile names (fast)
+python volfinder.py --top 50 --min-cap 1000   # top 50, only companies worth $1B+
 python volfinder.py --tickers TSLA,GME,MARA,IONQ
 python volfinder.py --html report.html --csv report.csv
 ```
 
+By default it pulls every US-listed stock worth over $300M that trades at least
+1M shares a day (from Yahoo's screener), then ranks them by how hard they've
+swung over the **last 3 and 6 months**.
+
 Example output:
 
 ```
-  # TICKER     PRICE  VOL/yr AVG MOVE   ATR% 5%+ DAYS   RETURN  MAX DD   $VOL/d  SCORE  RISK
-  1 WILD       98.34    111%     5.7%   8.9%       44    +144%    -33%     118M  100.0  VERY HIGH
+  # TICKER     PRICE  VOL 3M  VOL 6M 6M RANGE  BIG DAY AVG MOVE 5%+ DAYS   RETURN   $VOL/d  SCORE  RISK
+  1 BRUN        5.93    135%    138%     740%     +27%     6.7%       65     -77%      47M   99.5  EXTREME
 ...
-Today's pick: WILD (moves ~5.7% a day, risk VERY HIGH)
+Today's pick: BRUN (6-month range 740%, moves ~6.7% a day, risk EXTREME)
 ```
 
 | Column | Meaning |
 |---|---|
-| VOL/yr | Annualised volatility: how much the price swings in a typical year |
+| VOL 3M / VOL 6M | Annualised volatility over the last 3 and 6 months: how wildly the price jumps around |
+| 6M RANGE | How far the 6-month high is above the 6-month low (740% = the high was 8.4x the low) |
+| BIG DAY | Largest single-day move in the last 6 months |
 | AVG MOVE | Average size of one day's move, up or down |
-| ATR% | Average daily high-to-low range over the last 14 days, as % of price |
-| 5%+ DAYS | Days in the window with a move of 5% or more |
-| RETURN / MAX DD | Gain or loss over the window, and the worst fall from a high |
+| 5%+ DAYS | Days with a move of 5% or more |
+| RETURN | Gain or loss over the window (`--days`, default 126 = 6 months) |
 | $VOL/d | Dollars traded per day (bigger means easier to buy and sell) |
-| SCORE | 0–100 blend of the above (45% vol, 25% ATR, 20% avg move, 10% big days) |
+| SCORE | 0–100 blend: 30% vol 3M, 30% vol 6M, 20% 6M range, 10% ATR, 10% big days |
 
 What the scan leaves out by default:
 - stocks under **$2** (penny stocks): change with `--min-price`
