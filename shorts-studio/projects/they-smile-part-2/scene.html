@@ -1,6 +1,7 @@
 <!doctype html>
 <html><head><meta charset="utf-8">
-<!-- Tester Short "They Smile - Part 2: The Stare-Down". Deterministic: render.js calls render(t) per frame. -->
+<!-- Tester Short "They Smile - Part 2: The Stare-Down". Noir comic look: black, white, blood red.
+     Deterministic: render.js calls render(t) per frame. -->
 <style>
   html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#000}
   canvas{display:block}
@@ -10,31 +11,34 @@
 <script>
 const W = 1080, H = 1920;
 const T = {
-  hookEnd: 2.8, end: 51.0, endCard: 47.0,
-  lightsOn: 8.4,
-  tilt: [11.0, 13.0],
-  blinks: [[24.5, 8.5, 4.6], [32.2, 4.6, 2.3]],   // [time, metres before, metres after]
-  closeUp: [33.0, 34.3],
-  buzz: [37.0, 38.6],
-  notif: 39.2,
-  whisper: 46.0,
-  turn: [46.3, 47.0],
+  hookEnd: 2.8, end: 52.0, endCard: 48.0,
+  lean: [16.5, 17.3, 21.5],          // leans into the glass, then back
+  taps: [28.0, 28.55, 29.1],         // crowbar on the glass
+  closeUp: [34.6, 37.2],
+  crowd: 37.5, headlights: 40.5,
+  stopSmile: 45.0, lookPast: 46.4, cut: 47.8,
+  laughs: [[5.9, 4], [10.9, 3], [23.6, 7], [36.2, 6]],   // [time, syllables] Dale's giggles
+  // [start, end, text, who]  who: n = narrator, d = Dale
   caps: [
-    [3.2, 5.4, 'the cooler door was wide open.'],
-    [5.6, 8.2, 'her phone was on the floor. i picked it up.'],
-    [9.0, 11.0, '...maddie?'],
-    [12.0, 14.8, "she's smiling. maddie never smiles like that.", 'red'],
-    [15.0, 17.2, 'you never look away from them.'],
-    [17.4, 19.8, "they're like dogs. look away, they charge."],
-    [20.0, 22.3, 'so we stare.', 'red'],
-    [22.5, 24.4, 'my eyes are burning.'],
-    [25.2, 27.3, 'she moved.', 'red'],
-    [27.5, 29.8, "she's copying my breathing."],
-    [30.0, 32.1, "don't blink. don't blink. don't—"],
-    [34.4, 36.8, 'close enough to hear her humming.'],
-    [37.4, 39.0, 'my phone buzzed.'],
-    [41.6, 43.8, 'a text. from my own number.', 'red'],
-    [44.0, 46.2, "she's right in front of me. so who's behind me?"],
+    [3.0, 5.0, 'the cashier was waiting at the door.', 'n'],
+    [5.0, 7.3, 'heyyy. you made it.', 'd'],
+    [7.5, 9.4, "maddie's phone was in his hand.", 'n'],
+    [9.5, 11.9, 'she let me in. sweet kid.', 'd'],
+    [12.0, 14.3, "the door wasn't locked.", 'n'],
+    [14.4, 16.4, 'he wanted me to open it.', 'n'],
+    [16.5, 19.3, "c'mon in. it's only fun if you come in.", 'd'],
+    [19.5, 21.9, 'there was a red trail to the back room.', 'n'],
+    [22.0, 24.8, "she's back there. still talking about you.", 'd'],
+    [25.0, 27.8, 'so we stared at each other. neither of us moved.', 'n'],
+    [28.0, 30.3, 'tap. tap. tap.', 'n'],
+    [30.5, 32.4, "you know what's funny?", 'd'],
+    [32.5, 34.5, "you told her 'i'm 5 min away'", 'd'],
+    [34.6, 37.2, '...so did I.', 'd'],
+    [37.5, 40.3, 'then i heard them. laughing. a lot of them.', 'n'],
+    [40.5, 42.4, 'headlights on route 9.', 'n'],
+    [42.5, 44.8, 'those are my friends. they LOVE new people.', 'd'],
+    [45.0, 46.3, 'then he stopped smiling.', 'n'],
+    [46.4, 47.8, 'he was looking behind me.', 'n'],
   ],
 };
 window.TIMELINE = T;
@@ -44,7 +48,6 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const lerp = (a, b, p) => a + (b - a) * p;
 const ease = p => { p = clamp(p, 0, 1); return p * p * (3 - 2 * p); };
 function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
-// smooth noise for handheld camera
 function sn(t, seed) { let v = 0; for (let k = 1; k <= 3; k++) v += Math.sin(t * (0.7 * k + seed) + seed * k * 1.7) / k; return v / 1.83; }
 
 // ---- static world (generated once)
@@ -103,130 +106,240 @@ function drawAisle(L) {
     x.beginPath(); x.moveTo(...P(side * (AW - 0.5), y, ZN + 0.2)); x.lineTo(...P(side * (AW - 0.5), y, ZF)); x.stroke();
   }
   // fluorescent panels
-  for (let z = 2; z < ZF; z += 3) {
+  for (let z = 5; z < ZF; z += 3) {
     const on = L > 0.05;
     quad(P(-0.25, 2.69, z), P(0.25, 2.69, z), P(0.25, 2.69, z + 1.2), P(-0.25, 2.69, z + 1.2), on ? `rgba(225,240,228,${clamp(L * 1.1, 0, 1)})` : '#0a0a0a');
   }
 }
 
-// head / face. r = head radius in px. detail 0..1 (0 = silhouette far away). Mostly shadow on purpose.
-function drawHead(cx, cy, r, tilt, detail, lit) {
+
+
+// ---------- Dale: an ordinary middle-aged cashier. The rash ("the bloom") spreads from his mouth.
+const RB = rng(777);
+const bloom = [];            // rash blotches in face space (-1..1)
+for (let i = 0; i < 180; i++) {
+  const a = RB() * Math.PI * 2, d = Math.pow(RB(), 0.7);
+  const bx = Math.cos(a) * d * 0.62, by = 0.42 + Math.sin(a) * d * 0.5 - d * 0.25;
+  bloom.push({ x: bx, y: by, r: 0.015 + RB() * 0.045 * (1 - d * 0.6), a: 0.35 + RB() * 0.5 });
+}
+const veins = [];
+for (let i = 0; i < 0; i++) { const sx = i % 2 ? 1 : -1; veins.push({ sx, a: -0.3 - RB() * 1.2, l: 0.25 + RB() * 0.35, k: RB() }); }
+const splat = [];
+for (let i = 0; i < 26; i++) splat.push({ x: -0.6 + RB() * 0.9, y: -0.7 + RB() * 1.5, r: 0.008 + RB() * 0.03 });
+const stub = [];
+for (let i = 0; i < 260; i++) { const a = Math.PI * (0.1 + RB() * 0.8), d = 0.55 + RB() * 0.4; stub.push({ x: Math.cos(a) * d * 0.72, y: 0.15 + Math.sin(a) * d * 0.85 }); }
+
+// face. r = half the head height in px. talk 0..1 = jaw open. smile 0..1. look = eye direction. Painted soft, lit from below by the phone.
+function blob(cx, cy, rx, ry, col, a0) {
+  const g = x.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rx, ry));
+  g.addColorStop(0, col.replace('A', a0)); g.addColorStop(1, col.replace('A', 0));
+  x.save(); x.translate(cx, cy); x.scale(rx / Math.max(rx, ry), ry / Math.max(rx, ry)); x.translate(-cx, -cy);
+  x.fillStyle = g; x.beginPath(); x.arc(cx, cy, Math.max(rx, ry), 0, Math.PI * 2); x.fill(); x.restore();
+}
+function drawFace(cx, cy, r, o) {
+  const { talk = 0, smile = 1, look = [0, 0], light = 1, tilt = 0 } = o;
+  const lv = clamp(light, 0.3, 1.3);
   x.save(); x.translate(cx, cy); x.rotate(tilt);
-  const s = clamp(lit * detail, 0, 1);
-  // long hair behind, falling past the shoulders
-  x.fillStyle = '#040303';
-  x.beginPath(); x.moveTo(-r * 0.95, -r * 0.2);
-  x.quadraticCurveTo(-r * 1.15, r * 1.2, -r * 0.9, r * 2.1); x.lineTo(r * 0.9, r * 2.1);
-  x.quadraticCurveTo(r * 1.15, r * 1.2, r * 0.95, -r * 0.2);
-  x.ellipse(0, -r * 0.2, r * 0.95, r * 0.95, 0, 0, Math.PI, true); x.fill();
-  // face: dark, lit only from the fluorescent tube above
-  const g = x.createRadialGradient(0, -r * 0.75, r * 0.05, 0, -r * 0.1, r * 1.15);
-  g.addColorStop(0, `rgb(${16 + 70 * s | 0},${12 + 56 * s | 0},${12 + 52 * s | 0})`);
-  g.addColorStop(0.55, `rgb(${10 + 30 * s | 0},${8 + 23 * s | 0},${8 + 22 * s | 0})`);
-  g.addColorStop(1, '#050404');
-  x.fillStyle = g; x.beginPath(); x.ellipse(0, 0, r * 0.74, r, 0, 0, Math.PI * 2); x.fill();
-  // deep eye sockets
+  const line = Math.max(1, r * 0.012);
+  const SK = (k, a = 1) => `rgba(${(214 * k) | 0},${(168 * k) | 0},${(146 * k) | 0},${a})`; // skin at brightness k
+  // ears
+  for (const sx of [-1, 1]) { x.fillStyle = SK(0.35 * lv); x.beginPath(); x.ellipse(sx * r * 0.76, r * 0.02, r * 0.1, r * 0.19, sx * 0.1, 0, Math.PI * 2); x.fill(); }
+  // head: heavy jaw, a bit of jowl
+  const head = new Path2D();
+  head.moveTo(-r * 0.7, -r * 0.4);
+  head.quadraticCurveTo(-r * 0.7, -r * 1.0, 0, -r * 1.0);
+  head.quadraticCurveTo(r * 0.7, -r * 1.0, r * 0.7, -r * 0.4);
+  head.bezierCurveTo(r * 0.74, r * 0.2, r * 0.66, r * 0.6, r * 0.4, r * 0.84);
+  head.quadraticCurveTo(0, r * (1.02 + 0.07 * talk), -r * 0.4, r * 0.84);
+  head.bezierCurveTo(-r * 0.66, r * 0.6, -r * 0.74, r * 0.2, -r * 0.7, -r * 0.4);
+  x.save(); x.clip(head);
+  // base: lit from below, the top of the head falls off into darkness
+  const g = x.createLinearGradient(0, r * 1.0, 0, -r * 1.0);
+  g.addColorStop(0, SK(0.95 * lv)); g.addColorStop(0.35, SK(0.72 * lv)); g.addColorStop(0.7, SK(0.38 * lv)); g.addColorStop(1, SK(0.1));
+  x.fillStyle = g; x.fillRect(-r, -r * 1.1, r * 2, r * 2.2);
+  // form: soft side falloff, lit chin, cheeks, nose underside
+  blob(r * 0.62, 0, r * 0.4, r * 1.0, 'rgba(10,5,4,A)', 0.7 * 1);
+  blob(-r * 0.66, 0, r * 0.25, r * 1.0, 'rgba(10,5,4,A)', 0.45);
+  blob(0, r * 0.88, r * 0.3, r * 0.14, `rgba(255,225,205,A)`, 0.35 * lv);
+  for (const sx of [-1, 1]) blob(sx * r * 0.36, r * 0.22, r * 0.2, r * 0.14, 'rgba(255,215,195,A)', 0.22 * lv);
+  // the bloom: a red rash spreading from the mouth, finer and blotchier
+  for (const b of bloom) blob(b.x * r, b.y * r + r * 0.05, b.r * r * 1.5, b.r * r * 1.2, 'rgba(170,18,22,A)', b.a * 0.75);
+  x.strokeStyle = 'rgba(120,10,14,0.55)'; x.lineWidth = Math.max(1, r * 0.006);
+  for (const v of veins) {
+    x.beginPath(); x.moveTo(v.sx * r * 0.28, r * 0.45);
+    x.quadraticCurveTo(v.sx * r * (0.35 + v.k * 0.2), r * (0.32 - v.k * 0.1), v.sx * r * (0.28 + Math.cos(v.a) * v.l), r * (0.45 + Math.sin(v.a) * v.l)); x.stroke();
+  }
+  // stubble
+  x.fillStyle = 'rgba(40,26,22,0.35)';
+  for (const st of stub) x.fillRect(st.x * r, st.y * r, Math.max(1, r * 0.007), Math.max(1, r * 0.007));
+  // blood spatter (small)
+  x.fillStyle = 'rgba(100,0,4,0.9)';
+  for (const sp of splat) { x.beginPath(); x.arc(sp.x * r, sp.y * r, sp.r * r * 0.6, 0, Math.PI * 2); x.fill(); }
+  // eye sockets (shadowed from above), bags under the eyes, forehead lines
   for (const sx of [-1, 1]) {
-    const sg = x.createRadialGradient(sx * r * 0.3, -r * 0.12, 0, sx * r * 0.3, -r * 0.12, r * 0.24);
-    sg.addColorStop(0, 'rgba(0,0,0,0.85)'); sg.addColorStop(1, 'rgba(0,0,0,0)');
-    x.fillStyle = sg; x.beginPath(); x.ellipse(sx * r * 0.3, -r * 0.12, r * 0.26, r * 0.2, 0, 0, Math.PI * 2); x.fill();
+    blob(sx * r * 0.3, -r * 0.2, r * 0.22, r * 0.14, 'rgba(25,12,10,A)', 0.75);
+    x.strokeStyle = 'rgba(60,30,25,0.6)'; x.lineWidth = line;
+    x.beginPath(); x.moveTo(sx * r * 0.18, -r * 0.03); x.quadraticCurveTo(sx * r * 0.3, r * 0.04, sx * r * 0.43, -r * 0.04); x.stroke();
   }
-  // eyes: small, wide open, never blinking
+  x.strokeStyle = 'rgba(30,15,12,0.35)'; x.lineWidth = line;
+  for (let k = 0; k < 3; k++) { x.beginPath(); x.moveTo(-r * 0.35, -r * (0.56 + k * 0.07)); x.quadraticCurveTo(0, -r * (0.6 + k * 0.07 + 0.03 * smile), r * 0.35, -r * (0.56 + k * 0.07)); x.stroke(); }
+  // hair: short, thinning, dark
+  x.fillStyle = '#0b0807';
+  x.beginPath(); x.moveTo(-r * 0.72, -r * 0.35); x.quadraticCurveTo(-r * 0.78, -r * 1.1, 0, -r * 1.06); x.quadraticCurveTo(r * 0.78, -r * 1.1, r * 0.72, -r * 0.35);
+  x.lineTo(r * 0.62, -r * 0.5); x.quadraticCurveTo(r * 0.35, -r * 0.86, 0, -r * 0.8); x.quadraticCurveTo(-r * 0.35, -r * 0.86, -r * 0.62, -r * 0.5); x.closePath(); x.fill();
+  x.restore();
+  // brows: thick, raised in delight (they drop when he stops smiling)
+  const br = 0.1 * smile;
+  x.strokeStyle = '#120a08'; x.lineCap = 'round'; x.lineWidth = r * 0.045;
+  for (const sx of [-1, 1]) { x.beginPath(); x.moveTo(sx * r * 0.13, -r * (0.33 + br * 0.4)); x.quadraticCurveTo(sx * r * 0.3, -r * (0.42 + br), sx * r * 0.48, -r * (0.35 + br * 0.3)); x.stroke(); }
+  // eyes: wide awake and delighted, slightly bloodshot
   for (const sx of [-1, 1]) {
-    const ex = sx * r * 0.3, ey = -r * 0.13;
-    x.fillStyle = `rgba(205,195,172,${0.35 + 0.6 * detail})`;
-    x.beginPath(); x.ellipse(ex, ey, r * 0.105, r * 0.07, 0, 0, Math.PI * 2); x.fill();
-    if (detail > 0.3) {
-      x.save(); x.clip();
-      x.strokeStyle = `rgba(150,20,20,${0.35 * detail})`; x.lineWidth = Math.max(1, r * 0.005);
-      for (let v = 0; v < 4; v++) { const a = v / 6 * Math.PI * 2; x.beginPath(); x.moveTo(ex + Math.cos(a) * r * 0.11, ey + Math.sin(a) * r * 0.07); x.lineTo(ex + Math.cos(a + 0.4) * r * 0.05, ey + Math.sin(a + 0.4) * r * 0.03); x.stroke(); }
-      x.restore();
-      x.fillStyle = '#0d0806'; x.beginPath(); x.arc(ex + sx * r * 0.008, ey, r * 0.05, 0, Math.PI * 2); x.fill();
-      x.fillStyle = '#000'; x.beginPath(); x.arc(ex, ey, r * 0.016, 0, Math.PI * 2); x.fill();
-      x.fillStyle = `rgba(255,255,255,${0.9 * detail})`; x.beginPath(); x.arc(ex - r * 0.018, ey - r * 0.02, r * 0.01, 0, Math.PI * 2); x.fill();
-    }
-  }
-  // smile creases cutting up into the cheeks
-  if (detail > 0.2) {
-    x.strokeStyle = `rgba(0,0,0,${0.8 * detail})`; x.lineWidth = Math.max(1, r * 0.022); x.lineCap = 'round';
-    for (const sx of [-1, 1]) { x.beginPath(); x.moveTo(sx * r * 0.66, r * 0.22); x.quadraticCurveTo(sx * r * 0.62, r * 0.0, sx * r * 0.44, -r * 0.03); x.stroke(); }
-  }
-  // the grin: far too wide, teeth catching the light
-  x.beginPath();
-  x.moveTo(-r * 0.68, r * 0.2);
-  x.quadraticCurveTo(0, r * 0.46, r * 0.68, r * 0.2);
-  x.quadraticCurveTo(0, r * 0.98, -r * 0.68, r * 0.2);
-  x.closePath();
-  const tg = x.createLinearGradient(-r * 0.68, 0, r * 0.68, 0);
-  const tc = `rgba(${190 + 30 * detail | 0},${180 + 25 * detail | 0},${150 + 20 * detail | 0},1)`;
-  tg.addColorStop(0, '#1a1410'); tg.addColorStop(0.2, tc); tg.addColorStop(0.8, tc); tg.addColorStop(1, '#1a1410');
-  x.fillStyle = tg; x.fill();
-  if (detail > 0.25) {
-    x.save(); x.clip();
-    x.strokeStyle = `rgba(30,15,10,${0.85 * detail})`; x.lineWidth = Math.max(1, r * 0.012);
-    for (let i = -8; i <= 8; i++) { const tx = i * r * 0.078; x.beginPath(); x.moveTo(tx, r * 0.2); x.lineTo(tx * 0.95, r * 0.98); x.stroke(); }
-    x.lineWidth = Math.max(1, r * 0.02);
-    x.beginPath(); x.moveTo(-r * 0.72, r * 0.2); x.quadraticCurveTo(0, r * 0.72, r * 0.72, r * 0.2); x.stroke();
-    x.fillStyle = `rgba(110,8,8,${0.65 * detail})`;           // stained gum line
-    x.beginPath(); x.moveTo(-r * 0.68, r * 0.2); x.quadraticCurveTo(0, r * 0.46, r * 0.68, r * 0.2); x.quadraticCurveTo(0, r * 0.56, -r * 0.68, r * 0.2); x.fill();
+    const ex = sx * r * 0.3, ey = -r * 0.17, ew = r * 0.11, eh = r * lerp(0.05, 0.065, 1 - smile);
+    const eye = new Path2D(); eye.moveTo(ex - ew, ey); eye.quadraticCurveTo(ex, ey - eh * 2, ex + ew, ey); eye.quadraticCurveTo(ex, ey + eh * (1.3 - smile * 0.5), ex - ew, ey);
+    x.fillStyle = `rgba(${200 * lv | 0},${185 * lv | 0},${172 * lv | 0},1)`; x.fill(eye);
+    x.save(); x.clip(eye);
+    blob(ex - sx * ew, ey, ew * 0.6, eh, 'rgba(180,30,30,A)', 0.5);
+    const ix = ex + look[0] * ew * 0.45, iy = ey + look[1] * eh * 0.5;
+    x.fillStyle = '#3a2a1c'; x.beginPath(); x.arc(ix, iy, eh * 0.95, 0, Math.PI * 2); x.fill();
+    x.fillStyle = '#050302'; x.beginPath(); x.arc(ix, iy, eh * 0.42, 0, Math.PI * 2); x.fill();
+    x.fillStyle = 'rgba(255,255,255,0.95)'; x.beginPath(); x.arc(ix - eh * 0.25, iy + eh * 0.3, eh * 0.16, 0, Math.PI * 2); x.fill();
+    blob(ex, ey - eh * 1.2, ew * 1.2, eh * 1.2, 'rgba(0,0,0,A)', 0.55); // upper lid shadow
     x.restore();
+    x.strokeStyle = 'rgba(20,10,8,0.9)'; x.lineWidth = line * 1.6; x.beginPath(); x.moveTo(ex - ew, ey); x.quadraticCurveTo(ex, ey - eh * 2, ex + ew, ey); x.stroke();
+    x.strokeStyle = 'rgba(60,30,25,0.5)'; x.lineWidth = line;
+    for (let k = 0; k < Math.round(3 * smile); k++) { x.beginPath(); x.moveTo(sx * r * 0.43, ey + k * r * 0.03); x.lineTo(sx * r * 0.52, ey - r * 0.03 + k * r * 0.05); x.stroke(); }
   }
-  // strands of hair across the face
-  x.strokeStyle = '#040303'; x.lineWidth = Math.max(2, r * 0.07); x.lineCap = 'round';
-  for (const [sx, o] of [[-1, 0.15], [1, 0.25], [1, 0.05]]) { x.beginPath(); x.moveTo(sx * r * o, -r * 0.98); x.quadraticCurveTo(sx * r * (0.6 + o), -r * 0.45, sx * r * (0.55 + o), r * 1.0); x.stroke(); }
-  x.fillStyle = '#040303'; x.beginPath(); x.ellipse(0, -r * 0.86, r * 0.78, r * 0.3, 0, Math.PI, Math.PI * 2); x.fill();
+  // nose: soft shading, lit underside, nostrils
+  blob(r * 0.08, r * 0.05, r * 0.07, r * 0.2, 'rgba(20,10,8,A)', 0.5);
+  blob(0, r * 0.22, r * 0.12, r * 0.06, 'rgba(255,220,200,A)', 0.45 * lv);
+  x.fillStyle = 'rgba(25,10,8,0.95)';
+  for (const sx of [-1, 1]) { x.beginPath(); x.ellipse(sx * r * 0.065, r * 0.245, r * 0.035, r * 0.02, sx * 0.3, 0, Math.PI * 2); x.fill(); }
+  x.strokeStyle = 'rgba(40,18,14,0.7)'; x.lineWidth = line;
+  for (const sx of [-1, 1]) { x.beginPath(); x.moveTo(sx * r * 0.06, r * 0.15); x.quadraticCurveTo(sx * r * 0.15, r * 0.2, sx * r * 0.1, r * 0.27); x.stroke(); }
+  // mouth: a normal man's grin, just a little too wide, and it never stops
+  const mw = r * lerp(0.17, 0.33, smile), up = r * 0.09 * smile, my = r * 0.5, open = r * (0.03 + 0.14 * talk + 0.05 * smile);
+  const mouth = new Path2D();
+  mouth.moveTo(-mw, my - up); mouth.quadraticCurveTo(0, my + up * 0.1 - r * 0.02, mw, my - up);
+  mouth.quadraticCurveTo(0, my + open + up, -mw, my - up);
+  x.fillStyle = '#1a0506'; x.fill(mouth);
+  x.save(); x.clip(mouth);
+  if (smile > 0.3) {
+    x.fillStyle = `rgba(${226 * lv | 0},${214 * lv | 0},${190 * lv | 0},1)`; x.fillRect(-mw, my - up - r * 0.05, mw * 2, r * 0.05 + up * 0.75);
+    x.fillStyle = 'rgba(130,10,10,0.75)'; x.fillRect(-mw * 0.5, my - up * 0.25, mw * 0.8, r * 0.018);
+    x.strokeStyle = 'rgba(60,40,30,0.45)'; x.lineWidth = line * 0.6;
+    for (let i = -4; i <= 4; i++) { x.beginPath(); x.moveTo(i * mw * 0.21, my - up - r * 0.05); x.lineTo(i * mw * 0.21, my - up + r * 0.025); x.stroke(); }
+  }
+  blob(0, my + open + up, mw * 0.8, r * 0.05, 'rgba(0,0,0,A)', 0.5);
+  x.restore();
+  // lips
+  x.strokeStyle = `rgba(${120 * lv | 0},${55 * lv | 0},${50 * lv | 0},0.9)`; x.lineWidth = line * 1.4;
+  x.beginPath(); x.moveTo(-mw, my - up); x.quadraticCurveTo(0, my + up * 0.1 - r * 0.02, mw, my - up); x.stroke();
+  blob(0, my + open + up + r * 0.04, mw * 0.6, r * 0.03, `rgba(${150 * lv | 0},70,62,A)`, 0.6);
+  // smile lines cutting into the cheeks
+  x.strokeStyle = 'rgba(40,16,12,0.7)'; x.lineWidth = line * 1.5;
+  for (const sx of [-1, 1]) { x.beginPath(); x.moveTo(sx * r * 0.17, r * 0.24); x.quadraticCurveTo(sx * (mw + r * 0.1), r * 0.38, sx * (mw + r * 0.03), my + r * 0.06 * smile); x.stroke(); }
   x.restore();
 }
 
-function drawFigure(Z, tilt, breath, L) {
-  const s = cam.f / Z; // px per metre
+function drawDale(Z, o) {
+  const s = cam.f / Z;
   const [fx, fy] = P(0, 0, Z);
   const X = m => fx + m * s, Y = m => fy - m * s;
-  const sh = breath * 0.025;
-  x.save();
-  // faint rim light + soft edges so she reads against the aisle
-  x.shadowColor = `rgba(170,200,175,${0.5 * L})`; x.shadowBlur = Math.max(6, 0.07 * s);
-  x.filter = `blur(${Math.max(0.5, 0.004 * s).toFixed(1)}px)`;
-  x.fillStyle = '#060606'; x.strokeStyle = '#060606'; x.lineCap = 'round';
-  // thin legs
-  for (const sd of [-1, 1]) {
-    x.beginPath(); x.moveTo(X(sd * 0.03), Y(0.55)); x.lineTo(X(sd * 0.13), Y(0.55)); x.lineTo(X(sd * 0.1), Y(0.0)); x.lineTo(X(sd * 0.05), Y(0.0)); x.closePath(); x.fill();
+  const shake = o.giggle * Math.sin(o.t * 55) * 0.006;
+  const sy = shake;
+  // torso: dark shirt, dull red work vest, name tag
+  x.fillStyle = '#141313';
+  x.beginPath(); x.moveTo(X(-0.3), Y(0.6)); x.lineTo(X(-0.31), Y(1.4 + sy)); x.quadraticCurveTo(X(-0.29), Y(1.52 + sy), X(-0.1), Y(1.56 + sy));
+  x.lineTo(X(0.1), Y(1.56 + sy)); x.quadraticCurveTo(X(0.29), Y(1.52 + sy), X(0.31), Y(1.4 + sy)); x.lineTo(X(0.3), Y(0.6)); x.closePath(); x.fill();
+  // vest panels lit by the phone
+  const vg = x.createLinearGradient(0, Y(0.7), 0, Y(1.55));
+  vg.addColorStop(0, 'rgba(8,2,2,1)'); vg.addColorStop(0.55, `rgba(96,22,20,${0.9 * o.light})`); vg.addColorStop(1, 'rgba(30,7,6,1)');
+  x.fillStyle = vg;
+  for (const sd of [-1, 1]) { x.beginPath(); x.moveTo(X(sd * 0.07), Y(1.52 + sy)); x.lineTo(X(sd * 0.27), Y(1.45 + sy)); x.lineTo(X(sd * 0.28), Y(0.62)); x.lineTo(X(sd * 0.09), Y(0.62)); x.closePath(); x.fill(); }
+  // name tag
+  x.fillStyle = `rgba(235,230,220,${0.4 + 0.6 * o.light})`; x.fillRect(X(-0.24), Y(1.34 + sy), 0.13 * s, 0.05 * s);
+  x.fillStyle = '#000'; x.font = `800 ${0.028 * s | 0}px Inter, sans-serif`; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.fillText('DALE', X(-0.175), Y(1.315 + sy));
+  // left arm down, holding a crowbar (or raised to tap it on the glass)
+  const tapUp = o.tap;
+  x.strokeStyle = '#000'; x.lineCap = 'round'; x.lineWidth = 0.1 * s;
+  const hx = lerp(-0.36, -0.26, tapUp), hy = lerp(0.82, 1.35, tapUp);
+  x.beginPath(); x.moveTo(X(-0.29), Y(1.45 + sy)); x.quadraticCurveTo(X(-0.4), Y(1.1), X(hx), Y(hy)); x.stroke();
+  x.strokeStyle = '#111'; x.lineWidth = 0.03 * s;
+  const cx2 = lerp(-0.4, -0.1, tapUp), cy2 = lerp(0.2, 1.55 + o.tapHit * 0.03, tapUp);
+  x.beginPath(); x.moveTo(X(hx), Y(hy + 0.15 * (1 - tapUp))); x.lineTo(X(cx2), Y(cy2)); x.stroke();
+  x.strokeStyle = 'rgba(120,0,4,1)'; x.lineWidth = 0.034 * s; x.beginPath(); x.moveTo(X(lerp(hx, cx2, 0.75)), Y(lerp(hy, cy2, 0.75))); x.lineTo(X(cx2), Y(cy2)); x.stroke();
+  // right arm up, holding Maddie's phone at chest height: the light source
+  x.strokeStyle = '#000'; x.lineWidth = 0.1 * s;
+  x.beginPath(); x.moveTo(X(0.29), Y(1.45 + sy)); x.quadraticCurveTo(X(0.36), Y(1.0), X(0.12), Y(1.12)); x.stroke();
+  x.fillStyle = '#000'; x.beginPath(); x.ellipse(X(0.12), Y(1.12), 0.05 * s, 0.045 * s, 0, 0, Math.PI * 2); x.fill();
+  if (o.phone) {
+    x.save(); x.translate(X(0.1), Y(1.2)); x.rotate(-0.25);
+    x.fillStyle = '#111'; x.fillRect(-0.04 * s, -0.08 * s, 0.08 * s, 0.16 * s);
+    x.fillStyle = 'rgba(215,230,255,0.95)'; x.fillRect(-0.034 * s, -0.072 * s, 0.068 * s, 0.144 * s);
+    x.fillStyle = 'rgba(47,95,208,0.9)'; for (let k = 0; k < 4; k++) x.fillRect(-0.025 * s + (k % 2) * 0.02 * s, -0.05 * s + k * 0.03 * s, 0.03 * s, 0.015 * s);
+    x.restore();
+    // glow
+    const pg = x.createRadialGradient(X(0.1), Y(1.2), 0, X(0.1), Y(1.2), 0.5 * s);
+    pg.addColorStop(0, 'rgba(200,220,255,0.25)'); pg.addColorStop(1, 'rgba(200,220,255,0)');
+    x.fillStyle = pg; x.fillRect(X(-0.6), Y(1.8), 1.2 * s, 1.2 * s);
   }
-  // slumped body in a long hoodie / dress
-  x.beginPath();
-  x.moveTo(X(-0.06), Y(1.5 + sh));
-  x.quadraticCurveTo(X(-0.24), Y(1.47 + sh), X(-0.24), Y(1.3 + sh));
-  x.quadraticCurveTo(X(-0.2), Y(1.0), X(-0.27), Y(0.5));
-  x.quadraticCurveTo(X(0), Y(0.46), X(0.27), Y(0.5));
-  x.quadraticCurveTo(X(0.2), Y(1.0), X(0.24), Y(1.3 + sh));
-  x.quadraticCurveTo(X(0.24), Y(1.47 + sh), X(0.06), Y(1.5 + sh));
-  x.closePath(); x.fill();
-  // arms hanging too long, fingers past the knees
-  x.lineWidth = 0.06 * s;
-  for (const sd of [-1, 1]) {
-    x.beginPath(); x.moveTo(X(sd * 0.21), Y(1.38 + sh)); x.quadraticCurveTo(X(sd * 0.3), Y(0.95), X(sd * 0.26), Y(0.4)); x.stroke();
-    x.lineWidth = 0.018 * s;
-    for (const f of [-1, 0, 1]) { x.beginPath(); x.moveTo(X(sd * 0.26), Y(0.42)); x.lineTo(X(sd * 0.26 + f * 0.015), Y(0.3)); x.stroke(); }
-    x.lineWidth = 0.06 * s;
-  }
-  x.restore();
-  // head
-  const detail = clamp(1.6 / Z - 0.1, 0, 1);
-  drawHead(X(Math.sin(tilt) * 0.08), Y(1.63 + sh), 0.11 * s, tilt, detail, L);
+  // neck + head
+  const ng = x.createLinearGradient(0, Y(1.56), 0, Y(1.7)); ng.addColorStop(0, `rgba(150,110,95,${0.9 * o.light})`); ng.addColorStop(1, 'rgba(30,20,16,1)');
+  x.fillStyle = ng; x.fillRect(X(-0.055), Y(1.7 + sy), 0.11 * s, 0.16 * s);
+  x.fillStyle = '#1e1c1c'; for (const sd of [-1, 1]) { x.beginPath(); x.moveTo(X(sd * 0.04), Y(1.56 + sy)); x.lineTo(X(sd * 0.11), Y(1.58 + sy)); x.lineTo(X(sd * 0.06), Y(1.5 + sy)); x.closePath(); x.fill(); }
+  drawFace(X(o.tilt * 0.1), Y(1.77 + sy), 0.125 * s, o);
 }
 
-function caption(txt, alpha, red) {
+// ---------- the glass door between them
+const RG = rng(99);
+const smears = [[180, 520, 95], [900, 430, 80], [820, 1060, 110], [240, 1180, 70], [560, 300, 60]];
+function drawGlass(t, headlight) {
+  // door frame
+  x.fillStyle = '#0b0b0c'; x.fillRect(0, 0, 70, H); x.fillRect(W - 70, 0, 70, H); x.fillRect(0, 0, W, 90);
+  x.fillStyle = '#18181a'; x.fillRect(0, 1180, W, 46); // push bar
+  x.fillStyle = 'rgba(255,255,255,0.12)'; x.fillRect(0, 1180, W, 5);
+  x.fillStyle = 'rgba(230,230,230,0.5)'; x.font = '800 30px Inter, sans-serif'; x.textAlign = 'center'; x.fillText('PUSH', 540, 1150);
+  // blood smileys from Part 1, with drips
+  x.lineCap = 'round'; x.strokeStyle = 'rgba(125,4,8,0.7)'; x.fillStyle = 'rgba(125,4,8,0.7)';
+  for (const [sx, sy, sr] of smears) {
+    x.lineWidth = sr * 0.14;
+    x.beginPath(); x.arc(sx, sy, sr, 0, Math.PI * 2); x.stroke();
+    x.beginPath(); x.arc(sx - sr * 0.35, sy - sr * 0.25, sr * 0.1, 0, Math.PI * 2); x.arc(sx + sr * 0.35, sy - sr * 0.25, sr * 0.1, 0, Math.PI * 2); x.fill();
+    x.beginPath(); x.arc(sx, sy + sr * 0.05, sr * 0.55, 0.15 * Math.PI, 0.85 * Math.PI); x.stroke();
+    x.lineWidth = sr * 0.06;
+    for (let k = 0; k < 3; k++) { const dx = sx + (k - 1) * sr * 0.45, len = sr * (0.4 + 0.5 * ((k * 7 + sx) % 5) / 5); x.beginPath(); x.moveTo(dx, sy + sr * 0.9); x.lineTo(dx, sy + sr * 0.9 + len); x.stroke(); }
+  }
+  // greasy glass reflections, brighter in the headlights
+  x.save(); x.globalCompositeOperation = 'lighter';
+  for (let k = 0; k < 4; k++) {
+    const gx = 120 + k * 260;
+    const lg = x.createLinearGradient(gx, 0, gx + 160, 400);
+    lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(0.5, `rgba(255,255,255,${0.035 + 0.12 * headlight})`); lg.addColorStop(1, 'rgba(255,255,255,0)');
+    x.fillStyle = lg; x.beginPath(); x.moveTo(gx, 90); x.lineTo(gx + 70, 90); x.lineTo(gx - 330, H); x.lineTo(gx - 400, H); x.closePath(); x.fill();
+  }
+  // neon OPEN sign in the corner, flickering
+  const on = !(Math.sin(t * 13) > 0.93 || Math.sin(t * 3.1) > 0.985);
+  x.font = '900 64px "Inter Display", Inter, sans-serif'; x.textAlign = 'left';
+  x.shadowColor = 'rgba(255,40,40,0.9)'; x.shadowBlur = on ? 30 : 0;
+  x.fillStyle = on ? 'rgba(255,70,70,0.95)' : 'rgba(80,10,10,0.6)'; x.fillText('OPEN', 110, 190);
+  x.font = '700 26px Inter, sans-serif'; x.fillText('24 HOURS', 116, 230);
+  x.restore();
+}
+
+function caption(txt, alpha, who) {
   x.save(); x.globalAlpha = alpha; x.textAlign = 'center'; x.textBaseline = 'middle';
-  x.font = '800 66px Inter, "DejaVu Sans", sans-serif';
-  // wrap
-  const words = txt.split(' '), lines = []; let cur = '';
+  const dale = who === 'd';
+  x.font = dale ? 'italic 900 70px "Inter Display", Inter, sans-serif' : '800 62px Inter, "DejaVu Sans", sans-serif';
+  const words = (dale ? '“' + txt + '”' : txt).split(' '), lines = []; let cur = '';
   for (const w of words) { const tr = cur ? cur + ' ' + w : w; if (x.measureText(tr).width > 900) { lines.push(cur); cur = w; } else cur = tr; }
   lines.push(cur);
   lines.forEach((ln, i) => {
-    const y = 1290 + (i - (lines.length - 1) / 2) * 82;
-    x.lineWidth = 14; x.strokeStyle = 'rgba(0,0,0,0.9)'; x.lineJoin = 'round'; x.strokeText(ln, 540, y);
-    x.fillStyle = red ? '#ff2a2a' : '#fff'; x.fillText(ln, 540, y);
+    const y = 1420 + (i - (lines.length - 1) / 2) * 80;
+    x.lineWidth = 16; x.strokeStyle = 'rgba(0,0,0,0.95)'; x.lineJoin = 'round'; x.strokeText(ln, 540, y);
+    x.fillStyle = dale ? '#ff2a2a' : '#fff'; x.fillText(ln, 540, y);
   });
+  if (dale) { x.font = '800 30px Inter, sans-serif'; x.fillStyle = '#ff2a2a'; x.lineWidth = 8; const y0 = 1420 - (lines.length - 1) * 40 - 70; x.strokeText('DALE', 540, y0); x.fillText('DALE', 540, y0); }
   x.restore();
 }
 
@@ -235,109 +348,97 @@ function bigText(lines, y0, size, colors, alpha) {
   x.font = `900 ${size}px "Inter Display", Inter, sans-serif`;
   lines.forEach((ln, i) => {
     const y = y0 + i * size * 1.02;
-    x.lineWidth = 16; x.strokeStyle = 'rgba(0,0,0,0.85)'; x.lineJoin = 'round'; x.strokeText(ln, 540, y);
+    x.lineWidth = 18; x.strokeStyle = 'rgba(0,0,0,0.9)'; x.lineJoin = 'round'; x.strokeText(ln, 540, y);
     x.fillStyle = colors[i]; x.fillText(ln, 540, y);
   });
   x.restore();
 }
 
-function notification(p) {
-  const y = lerp(-260, 110, ease(p));
-  x.save();
-  x.fillStyle = 'rgba(38,38,44,0.96)'; x.beginPath(); x.roundRect(50, y, 980, 200, 44); x.fill();
-  x.fillStyle = '#34c759'; x.beginPath(); x.roundRect(90, y + 40, 96, 96, 24); x.fill();
-  x.fillStyle = '#fff'; x.beginPath(); x.ellipse(138, y + 86, 30, 24, 0, 0, Math.PI * 2); x.fill();
-  x.fillStyle = '#ddd'; x.font = '600 34px Inter, sans-serif'; x.textBaseline = 'alphabetic';
-  x.fillText('MESSAGES', 220, y + 66); x.fillStyle = '#999'; x.fillText('now', 930, y + 66);
-  x.fillStyle = '#fff'; x.font = '700 44px Inter, sans-serif'; x.fillText('Me (My Number)', 220, y + 120);
-  x.font = '400 44px Inter, "Noto Color Emoji", sans-serif'; x.fillText('look behind you 🙂', 220, y + 172);
-  x.restore();
-}
+function inCap(t, who) { return T.caps.some(([a, b, , w]) => w === who && t >= a && t < b); }
 
 window.render = function (t) {
+  const post = [];  // drawn after the colour grade so text stays crisp
   const frame = Math.round(t * 30), r = rng(frame * 7919 + 13);
-  x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.filter = 'none';
+  x.setTransform(1, 0, 0, 1, 0, 0); x.globalAlpha = 1; x.globalCompositeOperation = 'source-over'; x.shadowBlur = 0;
   x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
 
-  // ---- light level: dark -> flicker on at lightsOn -> occasional flicker after
-  let L;
-  if (t < T.lightsOn) L = 0.1 + 0.05 * (r() < 0.1 ? 1 : 0);
-  else { const d = t - T.lightsOn; L = d < 0.6 ? ((d * 20 | 0) % 3 === 0 ? 0.1 : 0.9) : 0.85; if (r() < 0.035) L = 0.25; }
+  const talking = inCap(t, 'd');
+  const talk = talking ? Math.abs(Math.sin(t * 11)) * 0.8 + Math.abs(Math.sin(t * 4.3)) * 0.2 : 0;
+  let giggle = 0;
+  for (const [lt, n] of T.laughs) { const d = t - lt; if (d >= 0 && d < n * 0.17 + 0.2) giggle = 1; }
+  const smile = 1 - ease((t - T.stopSmile) / 0.4);
+  const look = t >= T.lookPast ? [0.55, -0.7] : [sn(t * 0.3, 5) * 0.1, 0];
+  let tap = 0, tapHit = 0;
+  const tapA = T.taps[0] - 0.4, tapB = T.taps[T.taps.length - 1] + 0.4;
+  if (t >= tapA && t < tapB) { tap = ease((t - tapA) / 0.3) * ease((tapB - t) / 0.3); for (const k of T.taps) if (t >= k && t < k + 0.1) tapHit = 1; }
+  // lean into the glass
+  let Z = 1.12;
+  const [la, lb, lc] = T.lean;
+  if (t >= la) Z = lerp(1.12, 0.78, ease((t - la) / (lb - la)));
+  if (t >= lc) Z = lerp(0.78, 1.12, ease((t - lc) / 0.8));
+  const headlight = t >= T.headlights ? clamp((t - T.headlights) / 2.5, 0, 1) * (0.75 + 0.25 * Math.sin(t * 2)) : 0;
+  const tilt = 0.08 * Math.sin(t * 0.5) + (talking ? 0.04 * Math.sin(t * 3) : 0) + giggle * 0.05 * Math.sin(t * 40);
+  const o = { t, talk: giggle ? 0.7 + 0.3 * Math.sin(t * 50) : talk, smile, look, light: 1 + 0.3 * headlight, tilt, giggle, tap, tapHit, phone: true };
 
-  // ---- figure distance (as meters along the aisle)
-  // she starts at the far end and jumps closer during each blink (while the eyes are shut)
-  let Z = 8.5;
-  for (const [bt, , to] of T.blinks) if (t >= bt + 0.1) Z = to;
-  const tilt = 0.42 * ease((t - T.tilt[0]) / (T.tilt[1] - T.tilt[0])) + 0.03 * Math.sin(t * 0.9);
-  const breath = Math.sin(t * 2 * Math.PI / 3.2);
-
-  // ---- camera: handheld, slow push-in while staring, small kick when the phone buzzes
-  const shakeAmt = 6 + 10 * clamp((t - 20) / 26, 0, 1);
-  let push = 1 + 0.18 * ease((t - 20) / 26);
+  // handheld camera, slow push while they stare
+  const shakeAmt = 5 + 9 * clamp((t - 25) / 22, 0, 1) + (tapHit ? 10 : 0);
   cam.vx = 540 + sn(t * 1.3, 1) * shakeAmt; cam.vy = 860 + sn(t * 1.1, 2) * shakeAmt * 0.8;
-  if (t >= T.buzz[0] && t < T.buzz[1]) { cam.vx += (r() - 0.5) * 8; cam.vy += (r() - 0.5) * 8; }
-  cam.f = 900 * push;
+  cam.f = 900 * (1 + 0.12 * ease((t - 25) / 20));
 
-  const isHook = t < T.hookEnd;
-  const isClose = t >= T.closeUp[0] && t < T.closeUp[1];
-  const isEnd = t >= T.endCard;
+  const isHook = t < T.hookEnd, isClose = t >= T.closeUp[0] && t < T.closeUp[1], isEnd = t >= T.endCard, isBlack = t >= T.cut && !isEnd;
 
   if (isHook || isClose) {
-    // extreme close-up of the grin
-    const g = x.createRadialGradient(540, 900, 50, 540, 900, 900);
-    g.addColorStop(0, '#1a1614'); g.addColorStop(1, '#000'); x.fillStyle = g; x.fillRect(0, 0, W, H);
-    const k = isHook ? 1 + 0.06 * t : 1 + 0.15 * (t - T.closeUp[0]);
-    drawHead(540 + sn(t * 2, 3) * 10, 980 + sn(t * 2, 4) * 10, 560 * k, isHook ? 0.25 : tilt, 1, 0.42);
-    { const vg = x.createRadialGradient(540, 1000, 250, 540, 1000, 1000); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,0.9)'); x.fillStyle = vg; x.fillRect(0, 0, W, H); }
+    x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
+    const k = isHook ? 1 + 0.05 * t : 1 + 0.08 * (t - T.closeUp[0]);
+    drawFace(540 + sn(t * 2, 3) * 8, 900 + sn(t * 2, 4) * 8, 520 * k, { ...o, light: 1.1, tilt: 0.06 });
+    drawGlass(t, 0);
     if (isHook) {
-      bigText(["SHE HASN'T", 'STOPPED SMILING'], 300, 104, ['#fff', '#fff'], t > 0.15 ? 1 : 0);
-      bigText(['IN 4 MINUTES.'], 1560, 120, ['#ff2a2a'], t > 1.2 ? 1 : 0);
+      post.push(() => { bigText(["THEY DON'T", 'KILL YOU.'], 230, 120, ['#fff', '#fff'], t > 0.15 ? 1 : 0);
+      bigText(['NOT AT FIRST.'], 1560, 120, ['#ff2a2a'], t > 1.2 ? 1 : 0); });
+    } else {
+      for (const [a, b, txt, who] of T.caps) if (t >= a && t < b) post.push(() => caption(txt, clamp((t - a) / 0.12, 0, 1), who));
     }
-  } else if (!isEnd) {
-    drawAisle(L);
-    drawFigure(Z, tilt, breath, L);
-    // PART 2 tag
-    x.save(); x.strokeStyle = '#d01b1b'; x.lineWidth = 4; x.fillStyle = '#d01b1b'; x.font = '800 32px Inter, sans-serif';
-    x.strokeRect(830, 70, 190, 58); x.textBaseline = 'middle'; x.textAlign = 'center'; x.fillText('PART 2', 925, 100); x.restore();
-    // captions
-    for (const [a, b, txt, col] of T.caps) if (t >= a && t < b) caption(txt, clamp((t - a) / 0.12, 0, 1) * clamp((b - t) / 0.12, 0, 1), col === 'red');
-    // notification
-    if (t >= T.notif && t < T.turn[0]) notification((t - T.notif) / 0.35);
-    // whip-pan as he starts to turn around
-    if (t >= T.turn[0]) {
-      const p = (t - T.turn[0]) / (T.turn[1] - T.turn[0]);
-      const img = x.getImageData(0, 0, W, H); x.putImageData(img, -p * 1200, 0);
-      x.fillStyle = `rgba(0,0,0,${p})`; x.fillRect(0, 0, W, H);
-    }
-  } else {
-    // end card
+  } else if (isEnd) {
     x.fillStyle = '#000'; x.fillRect(0, 0, W, H);
     bigText(['PART 3?'], 760, 150, ['#ff2a2a'], t >= T.endCard + 0.4 ? 1 : 0);
     x.save(); x.textAlign = 'center'; x.fillStyle = '#eee'; x.font = '700 58px Inter, sans-serif';
-    x.globalAlpha = t >= T.endCard + 1.2 ? 1 : 0; x.fillText('Turn around,', 540, 960); x.fillText('or keep staring?', 540, 1035);
+    x.globalAlpha = t >= T.endCard + 1.2 ? 1 : 0; x.fillText('Go in for Maddie,', 540, 960); x.fillText('or run?', 540, 1035);
     x.globalAlpha = t >= T.endCard + 2.2 ? 1 : 0; x.fillStyle = '#9a9aa2'; x.font = '600 44px Inter, sans-serif';
-    x.fillText('Comment TURN or STARE', 540, 1180); x.restore();
-  }
-
-  // ---- blinks: eyelids close and open
-  for (const [bt] of T.blinks) {
-    const d = t - bt;
-    if (d >= -0.08 && d < 0.2) {
-      const cl = d < 0.1 ? ease((d + 0.08) / 0.18) : 1 - ease((d - 0.1) / 0.1);
-      const hgt = cl * H / 2;
-      x.fillStyle = '#000'; x.fillRect(0, 0, W, hgt); x.fillRect(0, H - hgt, W, hgt);
+    x.fillText('Comment IN or RUN', 540, 1180); x.restore();
+  } else if (!isBlack) {
+    // store interior behind the glass
+    const L = 0.8 + (r() < 0.03 ? -0.5 : 0);
+    drawAisle(L);
+    // blood trail on the floor to the back room
+    x.fillStyle = 'rgba(110,0,4,0.85)';
+    for (let z = 1.6; z < 16; z += 0.35) { const px = Math.sin(z * 0.7) * 0.25 + (z > 11 ? (z - 11) * 0.2 : 0); const a = P(px - 0.09, 0, z), b = P(px + 0.09, 0, z + 0.3); x.beginPath(); x.ellipse((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, Math.abs(b[0] - a[0]) / 2 + 2, Math.abs(a[1] - b[1]) / 2 + 1, 0, 0, Math.PI * 2); x.fill(); }
+    // the exterior is dark: darken the interior a touch, so the door reads as glass
+    x.fillStyle = 'rgba(0,0,0,0.25)'; x.fillRect(0, 0, W, H);
+    drawDale(Z, o);
+    drawGlass(t, headlight);
+    // headlights sweeping across the glass
+    if (headlight > 0) {
+      x.save(); x.globalCompositeOperation = 'lighter';
+      const hx = lerp(1400, 300, clamp((t - T.headlights) / 7, 0, 1));
+      for (const off of [-140, 140]) { const hg = x.createRadialGradient(hx + off, 1000, 0, hx + off, 1000, 520); hg.addColorStop(0, `rgba(255,250,235,${0.33 * headlight})`); hg.addColorStop(1, 'rgba(255,250,235,0)'); x.fillStyle = hg; x.fillRect(0, 0, W, H); }
+      x.restore();
     }
+    x.save(); x.strokeStyle = '#d01b1b'; x.lineWidth = 4; x.fillStyle = '#d01b1b'; x.font = '800 32px Inter, sans-serif';
+    x.strokeRect(830, 120, 190, 58); x.textBaseline = 'middle'; x.textAlign = 'center'; x.fillText('PART 2', 925, 150); x.restore();
+    for (const [a, b, txt, who] of T.caps) if (t >= a && t < b) post.push(() => caption(txt, clamp((t - a) / 0.12, 0, 1) * clamp((b - t) / 0.12, 0, 1), who));
   }
 
-  // ---- color grade: red creeps in, sting flashes
-  const dread = clamp((t - 3) / 40, 0, 1);
-  if (!isEnd) { x.fillStyle = `rgba(120,0,0,${0.06 + 0.22 * dread})`; x.globalCompositeOperation = 'multiply'; x.fillRect(0, 0, W, H); x.globalCompositeOperation = 'source-over'; }
-  for (const [bt] of T.blinks) { const d = t - bt - 0.1; if (d >= 0 && d < 0.5) { x.fillStyle = `rgba(200,0,0,${0.35 * (1 - d / 0.5)})`; x.fillRect(0, 0, W, H); } }
-  // vignette
-  const v = x.createRadialGradient(540, 960, 400, 540, 960, 1150);
+  // grade: crushed noir blacks, blood-red tint creeping in
+  if (!isEnd && !isBlack) {
+    const dread = clamp((t - 3) / 42, 0, 1);
+    x.globalCompositeOperation = 'multiply'; x.fillStyle = `rgba(215,${190 - 60 * dread | 0},${185 - 60 * dread | 0},1)`; x.fillRect(0, 0, W, H);
+    x.globalCompositeOperation = 'source-over';
+    if (tapHit) { x.fillStyle = 'rgba(255,255,255,0.06)'; x.fillRect(0, 0, W, H); }
+  }
+  const v = x.createRadialGradient(540, 960, 420, 540, 960, 1150);
   v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.85)'); x.fillStyle = v; x.fillRect(0, 0, W, H);
-  // scanlines + grain
-  x.globalAlpha = 0.14; x.globalCompositeOperation = 'screen'; x.drawImage(grains[frame % 8], 0, 0, W, H);
+  for (const f of post) f();
+  x.globalAlpha = 0.13; x.globalCompositeOperation = 'screen'; x.drawImage(grains[frame % 8], 0, 0, W, H);
   x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1;
 };
 render(0);

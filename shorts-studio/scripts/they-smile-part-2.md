@@ -1,51 +1,58 @@
 # They Smile: Part 2 — The Stare-Down (tester Short)
 
-Picks up straight after Part 1 (the series intro). The text chat gives way to a first-person scene in the gas station aisle, with narration captions. This episode is a stare-down: the infected are like dogs, so if you look away, they charge. Every time he blinks, she's closer.
+This picks up right after Part 1, which is now the series intro. The brother reaches the gas station. Dale, the infected cashier, is waiting on the other side of the glass door with Maddie's phone.
 
-Everything here is original. Gore is implied, never shown.
+**Tone:** in line with Crossed. The infected are **ordinary people**, marked by a rash ("the bloom") that spreads from the mouth across the face. They're not monsters or ghosts. They're gleeful, chatty and cruel: they joke, taunt, play with you, and hunt in laughing packs.
 
-**Format:** a first-person aisle scene drawn in code, narration captions, synthesized sound design, 51 s.
+Everything here is original. Nothing is taken from Crossed itself: no cross-shaped mark, no characters, no art. Violence is implied (blood, a trail, "she's still talking about you"), never shown, to stay monetizable. Crossed's real content would get the channel struck.
+
+**Format:** a noir comic look (black, white and blood red), first person through a glass door, narration plus Dale's dialogue as captions, synthesized sound. 52 s.
 
 ## Hook (0–2.8 s)
-Extreme close-up of Maddie's grin in the dark:
-> SHE HASN'T STOPPED SMILING
-> **IN 4 MINUTES.**
+Close-up of Dale behind the bloody glass, lit from below by the phone:
+> THEY DON'T KILL YOU.
+> **NOT AT FIRST.**
 
 ## Beat-by-beat
-| Time | On screen | Caption (Chris's VO line) | Sound |
+White = narrator (Chris's VO). Red with quotes = Dale.
+
+| Time | On screen | Caption | Sound |
 |---|---|---|---|
-| 0.0–2.8 | Close-up of the grin | Hook text | Two booms |
-| 3.2 | Dark aisle | the cooler door was wide open. | Drone, room tone |
-| 5.6 | | her phone was on the floor. i picked it up. | |
-| 8.4 | Lights flicker on. She's standing at the end of the aisle | | Electrical clunks, fluorescent hum |
-| 9.0 | | ...maddie? | |
-| 11–13 | Her head tilts slowly | | Neck cracks |
-| 12.0 | | she's smiling. maddie never smiles like that. *(red)* | |
-| 15.0 | | you never look away from them. | |
-| 17.4 | | they're like dogs. look away, they charge. | |
-| 20.0 | Camera slowly pushes in | so we stare. *(red)* | Heartbeat starts |
-| 22.5 | | my eyes are burning. | |
-| 24.5 | **Blink.** She's halfway down the aisle | | Whoosh, sting |
-| 25.2 | | she moved. *(red)* | Breathing |
-| 27.5 | Her shoulders rise and fall with his | she's copying my breathing. | |
-| 30.0 | | don't blink. don't blink. don't— | |
-| 32.2 | **Blink.** She's right there | | Bigger sting |
-| 33.0–34.3 | Cut to a close-up of the grin | | |
-| 34.4 | | close enough to hear her humming. | Lullaby hum |
-| 37.0 | Camera jolts | my phone buzzed. | Two buzzes |
-| 39.2 | A notification drops: **Me (My Number): look behind you 🙂** | | Chime |
-| 41.6 | | a text. from my own number. *(red)* | |
-| 44.0 | | she's right in front of me. so who's behind me? | |
-| 46.0 | | | A whisper, hard left |
-| 46.3–47.0 | He starts to turn: whip pan to black | | Whoosh, hard cut to silence |
-| 47.0–51.0 | End card: **PART 3?** / Turn around, or keep staring? / Comment TURN or STARE | | Music-box notes (same as Part 1) |
+| 0.0–2.8 | Close-up of Dale | Hook | Two booms |
+| 3.0 | Dale behind the glass door, blood smileys on it, the aisle behind him | the cashier was waiting at the door. | Wind, crickets, store hum, neon buzz |
+| 5.0 | | **"heyyy. you made it."** | Giggle |
+| 7.5 | He holds up Maddie's phone; it lights his face | maddie's phone was in his hand. | |
+| 9.5 | | **"she let me in. sweet kid."** | Giggle |
+| 12.0 | | the door wasn't locked. | |
+| 14.4 | | he wanted me to open it. | |
+| 16.5 | He leans in until his face is at the glass | **"c'mon in. it's only fun if you come in."** | Face squeaks on the glass |
+| 19.5 | Blood trail on the floor to the back | there was a red trail to the back room. | |
+| 22.0 | | **"she's back there. still talking about you."** | Long laugh |
+| 25.0 | Camera slowly pushes in | so we stared at each other. neither of us moved. | Heartbeat starts |
+| 28.0 | He taps the crowbar on the glass ×3 | tap. tap. tap. | Glass tinks |
+| 30.5 | | **"you know what's funny?"** | |
+| 32.5 | | **"you told her 'i'm 5 min away'"** | |
+| 34.6 | Close-up | **"...so did I."** | Laugh |
+| 37.5 | | then i heard them. laughing. a lot of them. | A distant crowd laughing, growing |
+| 40.5 | Headlights sweep across the glass | headlights on route 9. | Engines, right to left |
+| 42.5 | | **"those are my friends. they LOVE new people."** | |
+| 45.0 | **His smile drops for the first time** | then he stopped smiling. | Crickets and drone cut out; only the heartbeat |
+| 46.4 | His eyes move past you, up and over your shoulder | he was looking behind me. | A low swell |
+| 47.8 | Black | | The whole pack laughs right behind you. Hard cut |
+| 48.0–52.0 | End card: **PART 3?** / Go in for Maddie, or run? / Comment IN or RUN | | Music-box notes (the series motif) |
 
 ## Human angle (needed before posting)
-Same as Part 1. The best option is for Chris to whisper the captions as a voiceover, saved to `footage/they-smile-part-2/vo.wav`. The captions are already timed as his lines.
+Chris records the white narrator lines as a tense, quiet voiceover, saved to `footage/they-smile-part-2/vo.wav`. Bonus: he does Dale's red lines too, in a cheerful, friendly voice. The contrast is what makes it Crossed.
 
 ## Call to action
-The end card asks viewers to comment TURN or STARE. **Part 3 follows whichever wins**, so the audience picks the story. Say that in the pinned comment.
+The end card asks viewers to comment IN or RUN. **Part 3 follows the winner**, and the pinned comment says so.
+
+## Series rules (keep them consistent)
+- The infected look like normal people with the bloom rash. Never monsters, never giant grins.
+- They talk, joke and mimic voices (Dale faked the brother's voice in Part 1).
+- They hunt in laughing packs.
+- Violence is implied, never shown.
 
 ## Part 3 seeds
-- **TURN:** behind him is *himself*, grinning. Or the cashier from Part 1, holding his phone.
-- **STARE:** he backs toward the door without breaking eye contact. She follows step for step, still humming.
+- **IN:** he shoulders through the door. Dale doesn't stop him; he holds the door open, laughing. The back room has Maddie, alive, tied to a chair, smiling.
+- **RUN:** he sprints for the car with the pack's headlights on him. Maddie's phone buzzes in Dale's hand: "you left her 🙂".

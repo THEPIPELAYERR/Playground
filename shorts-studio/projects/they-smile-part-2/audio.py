@@ -9,7 +9,7 @@ tl = json.load(open(sys.argv[1]))
 DUR = tl["end"]
 N = int(DUR * SR)
 t = np.arange(N) / SR
-rng = np.random.default_rng(11)
+rng = np.random.default_rng(23)
 L = np.zeros(N); R = np.zeros(N)
 
 
@@ -23,7 +23,7 @@ def filt(x, lo=None, hi=None):
 def add(sig, at, gain=1.0, pan=0.0):
     """pan -1 = left, +1 = right"""
     i = int(at * SR)
-    if i >= N or i + len(sig) <= 0: return
+    if i >= N: return
     if i < 0: sig = sig[-i:]; i = 0
     sig = sig[: N - i] * gain
     L[i:i + len(sig)] += sig * np.sqrt((1 - pan) / 2) * 1.414
@@ -43,21 +43,47 @@ def win(a, b, fade=0.05):
     return np.clip((t - a) / fade, 0, 1) * np.clip((b - t) / fade, 0, 1)
 
 
-end_scene = tl["turn"][1]; endcard = tl["endCard"]; lights = tl["lightsOn"]
+def laugh(n, f0=170.0, rate=0.17, seed=0):
+    """A giggle: n 'ha' syllables, breathy onset, falling pitch, through a crude 'a' formant."""
+    r = np.random.default_rng(seed)
+    out = np.zeros(int((n * rate + 0.4) * SR))
+    for i in range(n):
+        st = int((i * rate + r.uniform(-0.015, 0.015)) * SR)
+        f = f0 * (1.2 - 0.3 * i / max(n - 1, 1)) * r.uniform(0.95, 1.05)
+        s = seg(0.13 + r.uniform(0, 0.04))
+        jitter = 1 + 0.02 * np.sin(2 * np.pi * r.uniform(5, 9) * s)
+        ph = 2 * np.pi * np.cumsum(f * jitter) / SR
+        voiced = sum(np.sin(k * ph) / k for k in range(1, 25))
+        voiced = filt(voiced, 250, 3200) + 0.6 * filt(voiced, 550, 1300)          # vowel colour
+        e = np.minimum(1, s / 0.012) * np.exp(-s / 0.06)
+        h = filt(r.standard_normal(len(s)), 900, 3500) * np.exp(-s / 0.02) * 0.6  # the 'h'
+        syl = voiced * e * 0.5 + h
+        st = max(0, st); m = min(len(syl), len(out) - st)
+        out[st:st + m] += syl[:m]
+    return np.tanh(out * 1.5)
 
-# ---- low drone + room tone (scene only), swelling with dread
+
+endcard = tl["endCard"]; cut = tl["cut"]; stop = tl["stopSmile"]
+
+# ---- night outside: wind, crickets (go quiet when he stops smiling)
+wind = filt(rng.standard_normal(N), 60, 500) * (0.6 + 0.4 * np.sin(2 * np.pi * 0.07 * t)) * 0.9
+ph = (t % 0.83) / 0.11
+chirp_env = np.where(ph < 1, np.sin(np.pi * np.clip(ph, 0, 1)) ** 2, 0) * (0.5 + 0.5 * np.sin(2 * np.pi * 30 * t)) ** 4
+crick = np.sin(2 * np.pi * 4400 * t) * chirp_env * 0.012
+outside = (wind * 0.05 + crick) * win(0, stop, 0.4)
+L += outside; R += outside * 0.9
+
+# ---- muffled store hum through the glass + the neon sign buzz
+hum = sum(np.sin(2 * np.pi * 120 * k * t) / k for k in range(1, 6)) * 0.012
+neon = sum(np.sin(2 * np.pi * 60 * k * t) / k for k in range(2, 10)) * 0.006
+L += (hum + neon * 1.4) * win(tl["hookEnd"] - 0.2, cut, 0.1); R += (hum + neon * 0.6) * win(tl["hookEnd"] - 0.2, cut, 0.1)
+
+# ---- dread drone, dropping out when he stops smiling
 dread = np.clip((t - 3) / 40, 0, 1)
-drone = (np.sin(2 * np.pi * 38.9 * t) + 0.7 * np.sin(2 * np.pi * 41.2 * t + 1) + 0.3 * np.sin(2 * np.pi * 77.8 * t)
-         + 0.2 * np.sin(2 * np.pi * 155.6 * t + 2) + 0.12 * np.sin(2 * np.pi * 233.1 * t * (1 + 0.003 * np.sin(0.5 * t))))
-room = filt(rng.standard_normal(N), hi=180) * 2.5 + filt(rng.standard_normal(N), lo=2500, hi=8000) * 0.015
-bed = (drone * 0.11 + room * 0.06) * (0.3 + 0.7 * dread) * win(tl["hookEnd"] - 0.3, end_scene, 0.3)
-L += bed; R += bed
-
-# ---- fluorescent hum: 120 Hz buzz with harmonics, on once the lights come on, with flicker dropouts
-buzz = sum(np.sin(2 * np.pi * 120 * k * t) / k for k in range(1, 9)) * 0.022
-buzz_gate = np.clip((t - lights) / 0.02, 0, 1) * (t < end_scene)
-flick = (np.floor(np.clip(t - lights, 0, 9) * 20) % 3 != 0) | (t > lights + 0.6)   # matches the on-screen flicker
-L += buzz * buzz_gate * flick; R += buzz * buzz_gate * flick * 0.8
+drone = (np.sin(2 * np.pi * 38.9 * t) + 0.7 * np.sin(2 * np.pi * 41.2 * t + 1) + 0.25 * np.sin(2 * np.pi * 155.6 * t + 2)
+         + 0.15 * np.sin(2 * np.pi * 233.1 * t * (1 + 0.003 * np.sin(0.5 * t))) + 0.1 * np.sin(2 * np.pi * 311.1 * t))
+d = drone * 0.12 * (0.3 + 0.7 * dread) * win(tl["hookEnd"] - 0.3, stop, 0.3)
+L += d; R += d
 
 # ---- hook hits
 for at in (0.15, 1.2):
@@ -66,85 +92,69 @@ for at in (0.15, 1.2):
     crack = filt(rng.standard_normal(len(s)), hi=2500) * env(len(s), 0.001, 0.06)
     add(np.tanh(2 * (boom + crack)) * 0.5, at)
 
-# ---- lights clunk on
-s = seg(0.5)
-clunk = np.tanh(3 * (np.sin(2 * np.pi * 70 * s) * env(len(s), 0.001, 0.05) + filt(rng.standard_normal(len(s)), 300, 3000) * env(len(s), 0.0005, 0.02) * 2))
-for d in (0, 0.1, 0.2, 0.45):
-    add(clunk, lights + d, 0.35)
+# ---- Dale's giggles, muffled by the glass
+for i, (at, n) in enumerate(tl["laughs"]):
+    g = laugh(n, f0=150 + 15 * (i % 2), rate=0.16, seed=i + 1)
+    add(filt(g, 120, 2400), at, 0.32 if n < 6 else 0.42)
 
-# ---- neck cracks while her head tilts
-for at in (tl["tilt"][0] + 0.4, tl["tilt"][0] + 1.1, tl["tilt"][0] + 1.7):
-    s = seg(0.08)
-    add(filt(rng.standard_normal(len(s)), 800, 6000) * env(len(s), 0.0003, 0.006) * 3, at, 0.35, pan=0.1)
+# ---- he leans into the glass: a squeak as his face drags on it
+s = seg(0.6)
+sq = np.sin(2 * np.pi * np.cumsum(700 + 500 * s / 0.6 + 60 * np.sin(2 * np.pi * 37 * s)) / SR)
+add(sq * np.sin(np.pi * s / 0.6) ** 2 * (0.6 + 0.4 * np.sign(np.sin(2 * np.pi * 23 * s))), tl["lean"][0] + 0.7, 0.05)
 
-# ---- his breathing (copied by her), from "copying my breathing" on
-b0 = 25.5
-br = filt(rng.standard_normal(N), 300, 2500) * 0.08
-breath_env = np.clip(np.sin(2 * np.pi * (t - b0) / 3.2), 0, 1) ** 2 * win(b0, end_scene - 0.4, 0.5)
-L += br * breath_env; R += br * breath_env
+# ---- crowbar on the glass
+for at in tl["taps"]:
+    s = seg(0.5)
+    tink = sum(a * np.sin(2 * np.pi * f * s) * np.exp(-s / dcy) for f, a, dcy in ((2350, 1, 0.12), (3720, 0.6, 0.08), (5110, 0.4, 0.05), (1180, 0.5, 0.15)))
+    thud = np.sin(2 * np.pi * 150 * s) * env(len(s), 0.001, 0.03)
+    add(tink * 0.5 + thud * 0.6, at, 0.45)
 
-# ---- heartbeat from "so we stare", speeding up
-hb = 20.0
-while hb < end_scene - 0.3:
-    prog = (hb - 20.0) / (end_scene - 20.0)
+# ---- heartbeat once the stare starts, speeding up
+hb = 25.0
+while hb < cut - 0.2:
+    prog = (hb - 25.0) / (cut - 25.0)
     for off, g in ((0, 1.0), (0.2, 0.7)):
         s = seg(0.3)
-        beat = np.sin(2 * np.pi * 52 * s) * env(len(s), 0.004, 0.07)
-        beat += filt(rng.standard_normal(len(s)), 90, 450) * env(len(s), 0.002, 0.03) * 2.5
+        beat = np.sin(2 * np.pi * 52 * s) * env(len(s), 0.004, 0.07) + filt(rng.standard_normal(len(s)), 90, 450) * env(len(s), 0.002, 0.03) * 2.5
         add(beat, hb + off, (0.3 + 0.5 * prog) * g)
     hb += 1.1 - 0.55 * prog
 
-# ---- blinks: soft whoosh as the eyes close, then a sting when she's closer
-for i, (bt, _, _) in enumerate(tl["blinks"]):
-    s = seg(0.25)
-    add(filt(rng.standard_normal(len(s)), 200, 1500) * np.sin(np.pi * s / 0.25) * 0.4, bt - 0.08, 0.6)
-    s = seg(2.5)
-    cluster = sum(np.sin(2 * np.pi * f * s * (1 - 0.02 * s)) for f in (110, 116.5, 164.8, 233.1, 246.9))
-    slam = filt(rng.standard_normal(len(s)), hi=4000) * env(len(s), 0.0005, 0.1) * 3
-    sub = np.sin(2 * np.pi * 36 * s) * env(len(s), 0.002, 0.7) * 2
-    st = np.tanh((0.8 + 0.4 * i) * (cluster * env(len(s), 0.003, 0.7) + slam + sub)) * (0.6 + 0.25 * i)
-    add(st, bt + 0.1)
+# ---- the pack: distant laughter that grows, from many voices
+c0 = tl["crowd"]
+for v in range(12):
+    vr = np.random.default_rng(100 + v)
+    at = c0 + vr.uniform(0, 3) + v * 0.6
+    while at < cut - 0.3:
+        g = laugh(int(vr.integers(3, 8)), f0=vr.uniform(110, 260), rate=vr.uniform(0.13, 0.2), seed=int(vr.integers(1e6)))
+        dist = 1 - np.clip((at - c0) / (cut - c0), 0, 1)               # gets closer
+        g = filt(g, 150, 900 + 2500 * (1 - dist))
+        add(g, at, 0.05 + 0.12 * (1 - dist), pan=vr.uniform(-0.8, 0.8))
+        at += vr.uniform(1.0, 2.6)
 
-# ---- her humming: a slow, slightly-off lullaby, through a crude vocal formant
-notes = [(0, 392), (0.9, 349.2), (1.8, 329.6), (2.7, 293.7), (4.2, 329.6), (5.1, 349.2), (6.0, 311.1), (7.8, 293.7), (8.7, 277.2)]
-h0 = 34.2
-for off, f in notes:
-    s = seg(1.1)
-    vib = 1 + 0.008 * np.sin(2 * np.pi * 5.2 * s)
-    ph = 2 * np.pi * np.cumsum(f * vib) / SR
-    voice = sum(np.sin(k * ph) / k ** 1.3 for k in range(1, 12))
-    voice = filt(voice, 180, 1400)
-    e = np.minimum(1, s / 0.15) * np.clip((1.1 - s) / 0.3, 0, 1)
-    add(voice * e, h0 + off, 0.06, pan=0.0)
+# ---- engines coming up Route 9 with the headlights, moving right to left
+h0 = tl["headlights"]
+eng = sum(np.sin(2 * np.pi * 43 * k * t * (1 + 0.01 * np.sin(2 * np.pi * 0.3 * t))) / k for k in range(1, 12))
+eng = filt(eng, 30, 400) + filt(rng.standard_normal(N), 300, 1800) * 0.3
+eg = np.clip((t - h0) / 6, 0, 1) ** 1.5 * (t < cut) * 0.12
+pan = np.clip(1 - (t - h0) / 7, -0.6, 1)
+L += eng * eg * np.sqrt((1 - pan) / 2) * 1.414; R += eng * eg * np.sqrt((1 + pan) / 2) * 1.414
 
-# ---- phone buzz in his pocket: two pulses
-for at in (tl["buzz"][0], tl["buzz"][0] + 0.7):
-    s = seg(0.45)
-    v = np.sign(np.sin(2 * np.pi * 165 * s)) * (0.6 + 0.4 * np.sin(2 * np.pi * 28 * s))
-    add(filt(v, 80, 900) * np.minimum(1, s / 0.02) * np.clip((0.45 - s) / 0.03, 0, 1), at, 0.22, pan=0.35)
+# ---- a low swell as he looks past, then the whole pack laughs right behind you, hard cut
+lp = tl["lookPast"]
+s = seg(cut - lp)
+add(filt(rng.standard_normal(len(s)), 60, 600) * (s / (cut - lp)) ** 2 * 0.8, lp)
+burst = sum(laugh(6, f0=f, rate=0.14, seed=500 + k) for k, f in enumerate((120, 150, 180, 210, 250)))
+add(burst / 3, cut - 0.25, 0.9, pan=0.0)
 
-# ---- message chime
-for off, f in ((0, 1318.5), (0.12, 1760)):
-    s = seg(0.6)
-    add((np.sin(2 * np.pi * f * s) + 0.2 * np.sin(4 * np.pi * f * s)) * env(len(s), 0.002, 0.15), tl["notif"] + off, 0.09)
-
-# ---- a whisper right behind him (hard-panned, breathy), then the whip-pan whoosh and a hard cut
-s = seg(0.9)
-whisper = filt(rng.standard_normal(len(s)), 1500, 7000) * np.sin(np.pi * s / 0.9) ** 2 * (0.7 + 0.3 * np.sin(2 * np.pi * 7 * s))
-add(whisper, tl["whisper"], 0.35, pan=-0.9)
-t0, t1 = tl["turn"]
-s = seg(t1 - t0)
-add(filt(rng.standard_normal(len(s)), 300, 5000) * (s / (t1 - t0)) ** 2 * 0.6, t0)
-
-# ---- end card: same music-box notes as Part 1 so the series sounds like one thing
+# ---- end card: the series' music-box notes
 for at, f in ((endcard + 0.4, 1046.5), (endcard + 1.2, 987.8), (endcard + 2.2, 1396.9)):
     s = seg(2.0)
     note = (np.sin(2 * np.pi * f * s) + 0.3 * np.sin(2 * np.pi * 2 * f * s) + 0.1 * np.sin(2 * np.pi * 3.01 * f * s))
     add(note * env(len(s), 0.002, 0.45), at, 0.09)
 
-# hard cut to silence at the end of the scene (everything still ringing gets chopped), then fade at the very end
-cut = (t < end_scene) | (t >= endcard + 0.3)
-L *= cut; R *= cut
+# hard cut to silence before the end card, then fade at the very end
+gate = (t < endcard) | (t >= endcard + 0.3)
+L *= gate; R *= gate
 fade = np.clip((DUR - t) / 0.6, 0, 1)
 L *= fade; R *= fade
 peak = max(np.abs(L).max(), np.abs(R).max())
