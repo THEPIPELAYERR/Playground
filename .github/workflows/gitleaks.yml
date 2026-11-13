@@ -1,0 +1,22 @@
+# Gitleaks: blocks API keys and passwords from landing in the repo.
+# Free for personal accounts (no license key needed).
+name: gitleaks
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * *" # daily, 4 AM Eastern
+permissions:
+  contents: read
+jobs:
+  scan:
+    name: gitleaks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

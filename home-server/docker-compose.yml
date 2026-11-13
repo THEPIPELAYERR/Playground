@@ -1,0 +1,81 @@
+# Chris's money stack: budgeting, bookkeeping, and portfolio tracking, all on your own machine.
+#   cp .env.example .env   # then fill in every value (see README.md)
+#   docker compose up -d
+# Every app listens on 127.0.0.1 only (this computer). To use them from your phone on home Wi-Fi,
+# see "Use it from your phone" in README.md. Never forward these ports on your router.
+
+services:
+  # Actual Budget: envelope budgeting (YNAB-style). http://localhost:5006
+  actual:
+    image: actualbudget/actual-server:latest
+    restart: unless-stopped
+    ports: ["127.0.0.1:5006:5006"]
+    volumes: ["actual-data:/data"]
+
+  # Firefly III: full bookkeeping, reports, rules. http://localhost:8080
+  firefly:
+    image: fireflyiii/core:latest
+    restart: unless-stopped
+    depends_on: [firefly-db]
+    ports: ["127.0.0.1:8080:8080"]
+    volumes: ["firefly-upload:/var/www/html/storage/upload"]
+    environment:
+      APP_KEY: ${FIREFLY_APP_KEY}
+      APP_URL: http://localhost:8080
+      TZ: America/New_York
+      TRUSTED_PROXIES: "**"
+      DB_CONNECTION: pgsql
+      DB_HOST: firefly-db
+      DB_PORT: "5432"
+      DB_DATABASE: firefly
+      DB_USERNAME: firefly
+      DB_PASSWORD: ${FIREFLY_DB_PASSWORD}
+  firefly-db:
+    image: postgres:16
+    restart: unless-stopped
+    volumes: ["firefly-db:/var/lib/postgresql/data"]
+    environment:
+      POSTGRES_DB: firefly
+      POSTGRES_USER: firefly
+      POSTGRES_PASSWORD: ${FIREFLY_DB_PASSWORD}
+
+  # Ghostfolio: investment portfolio tracker. http://localhost:3333
+  ghostfolio:
+    image: ghostfolio/ghostfolio:latest
+    restart: unless-stopped
+    depends_on: [ghostfolio-db, ghostfolio-redis]
+    ports: ["127.0.0.1:3333:3333"]
+    environment:
+      DATABASE_URL: postgresql://ghostfolio:${GHOSTFOLIO_DB_PASSWORD}@ghostfolio-db:5432/ghostfolio?connect_timeout=300&sslmode=prefer
+      REDIS_HOST: ghostfolio-redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${GHOSTFOLIO_REDIS_PASSWORD}
+      ACCESS_TOKEN_SALT: ${GHOSTFOLIO_ACCESS_TOKEN_SALT}
+      JWT_SECRET_KEY: ${GHOSTFOLIO_JWT_SECRET_KEY}
+  ghostfolio-db:
+    image: postgres:16
+    restart: unless-stopped
+    volumes: ["ghostfolio-db:/var/lib/postgresql/data"]
+    environment:
+      POSTGRES_DB: ghostfolio
+      POSTGRES_USER: ghostfolio
+      POSTGRES_PASSWORD: ${GHOSTFOLIO_DB_PASSWORD}
+  ghostfolio-redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--requirepass", "${GHOSTFOLIO_REDIS_PASSWORD}"]
+
+  # Fava: web interface for Beancount plain-text books. http://localhost:5000
+  # Your ledger is the plain-text file beancount/main.beancount in this folder.
+  fava:
+    image: python:3.12-slim
+    restart: unless-stopped
+    ports: ["127.0.0.1:5000:5000"]
+    volumes: ["./beancount:/data"]
+    command: ["sh", "-c", "pip install --quiet fava && fava --host 0.0.0.0 --port 5000 /data/main.beancount"]
+
+volumes:
+  actual-data:
+  firefly-upload:
+  firefly-db:
+  ghostfolio-db:
