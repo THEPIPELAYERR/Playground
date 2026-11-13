@@ -2,6 +2,7 @@
 # Setup: add a repo secret named ANTHROPIC_KEY (Settings → Secrets and variables → Actions).
 # Until that secret exists, this job skips itself instead of failing.
 # Costs a few cents of API usage per PR. Comment "/review" or "/improve" on a PR to re-run.
+# Runs only for trusted authors (see the job's if:), so strangers can't steer it or spend the key.
 name: pr-agent
 on:
   pull_request:
@@ -9,7 +10,17 @@ on:
   issue_comment:
 jobs:
   pr_agent_job:
-    if: ${{ github.event.sender.type != 'Bot' }}
+    # Only run for people who can already change this repo (prompt-injection guard):
+    #  - pull requests opened from branches of this repo (not forks), not by bots
+    #  - /review or /improve comments on a PR from the owner or a collaborator
+    # A stranger's PR or comment on this public repo never reaches the model or the API key.
+    if: >-
+      ${{ github.event.sender.type != 'Bot' && (
+        (github.event_name == 'pull_request' &&
+         github.event.pull_request.head.repo.full_name == github.repository) ||
+        (github.event_name == 'issue_comment' && github.event.issue.pull_request &&
+         contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
+      ) }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
