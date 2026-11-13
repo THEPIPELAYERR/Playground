@@ -1,0 +1,16 @@
+; Chris's plain-text books. Edit in any text editor; Fava (http://localhost:5000) shows the reports.
+; Docs: https://beancount.github.io/docs/
+option "title" "Chris's books"
+option "operating_currency" "USD"
+
+2026-11-01 open Assets:Checking            USD
+2026-11-01 open Assets:Savings:HomeBuild   USD
+2026-11-01 open Income:Job                 USD
+2026-11-01 open Expenses:Rent              USD
+2026-11-01 open Expenses:Electric          USD
+2026-11-01 open Equity:Opening-Balances    USD
+
+; Example entry (replace with real ones, or import a CSV from your bank):
+; 2026-11-01 * "Opening balance"
+;   Assets:Checking            0.00 USD
+;   Equity:Opening-Balances
