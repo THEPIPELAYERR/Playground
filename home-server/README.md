@@ -16,7 +16,7 @@ Beancount) plus Ghostfolio for investments. Comment out the ones you don't use i
 
 ## Start it (one time, about 20 minutes)
 1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows/Mac) or Docker Engine (Linux).
-2. In this folder: `cp .env.example .env`, then replace every value in `.env`:
+2. In this folder: `cp .env.example .env`, then fill in every value in `.env`:
    - passwords and secrets: `openssl rand -hex 24` (a different one each line)
    - `FIREFLY_APP_KEY`: exactly 32 characters, `openssl rand -hex 16`
 3. `docker compose up -d`, wait a minute, then open the addresses above.
