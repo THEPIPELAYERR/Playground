@@ -1,0 +1,190 @@
+{
+ "end": 53,
+ "shots": [
+  [
+   0,
+   "truck"
+  ],
+  [
+   4,
+   "rake"
+  ],
+  [
+   8.6,
+   "dale"
+  ],
+  [
+   13,
+   "iron"
+  ],
+  [
+   16.6,
+   "impact"
+  ],
+  [
+   20.6,
+   "glass"
+  ],
+  [
+   26.6,
+   "backdoor"
+  ],
+  [
+   31,
+   "maddie"
+  ],
+  [
+   37.4,
+   "whisper"
+  ],
+  [
+   42.4,
+   "gran"
+  ],
+  [
+   49,
+   "end"
+  ]
+ ],
+ "overlays": [
+  [
+   0.2,
+   "cap",
+   "There were eleven of them."
+  ],
+  [
+   0.9,
+   "sfx",
+   "VRRRMM"
+  ],
+  [
+   4.4,
+   "bal",
+   "Hi sweetie! You lost?"
+  ],
+  [
+   6.2,
+   "cap",
+   "They were friendly. That was the worst part."
+  ],
+  [
+   8.8,
+   "sfx",
+   "HA HA HA"
+  ],
+  [
+   9.6,
+   "bal",
+   "Door's open, buddy! Come on in!"
+  ],
+  [
+   11.2,
+   "cap",
+   "Eleven behind me. One in front."
+  ],
+  [
+   13.3,
+   "cap",
+   "I had a tire iron."
+  ],
+  [
+   14.8,
+   "cap",
+   "And one way to go."
+  ],
+  [
+   16.7,
+   "sfx",
+   "KRAK!"
+  ],
+  [
+   17.8,
+   "cap",
+   "So I went in."
+  ],
+  [
+   18.6,
+   "bal",
+   "HA— HA HA HA!"
+  ],
+  [
+   20.8,
+   "sfx",
+   "CLICK"
+  ],
+  [
+   21.4,
+   "cap",
+   "I locked the door."
+  ],
+  [
+   23,
+   "cap",
+   "They didn't even try it. They just watched."
+  ],
+  [
+   24.8,
+   "bal",
+   "Take your time!"
+  ],
+  [
+   26.9,
+   "cap",
+   "The trail went to the back room."
+  ],
+  [
+   28.6,
+   "bal",
+   "...hello?"
+  ],
+  [
+   29.8,
+   "cap",
+   "Maddie."
+  ],
+  [
+   31.4,
+   "bal",
+   "You came. You actually came."
+  ],
+  [
+   33.3,
+   "cap",
+   "No rash. She was clean."
+  ],
+  [
+   35,
+   "bal",
+   "You have to go. Now."
+  ],
+  [
+   37.7,
+   "bal",
+   "Dale's not the one in charge."
+  ],
+  [
+   39.9,
+   "bal",
+   "She is."
+  ],
+  [
+   42.6,
+   "sfx",
+   "tik tik tik"
+  ],
+  [
+   43.6,
+   "bal",
+   "Sit down, honey."
+  ],
+  [
+   45.6,
+   "bal",
+   "We've been waiting for you."
+  ]
+ ],
+ "impact": 16.6,
+ "lock": 20.6,
+ "reveal": 42.4,
+ "endCard": 49
+}
