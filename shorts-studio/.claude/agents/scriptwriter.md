@@ -11,6 +11,6 @@ Keep it conversational, in Chris's voice, within the type's max length. No unsup
 
 Extra by type:
 - faceless: one beat per shot, each with its on-screen number. Add a `## Sources` section with a link for every number (use WebSearch). Mark estimates "≈". Include at least one line of Chris's own take.
-- brainrot: scenes with speaker, dialogue (3-8 words a line), and the time-skip text. Use only characters from styles/brainrot-cast.md (add new ones there first). Mark which lines Chris voices.
+- brainrot: put `route: code` (default) or `route: ai` on the line under `type:`. Scenes with speaker, dialogue (3-8 words a line), and the time-skip text. Use only characters from styles/brainrot-cast.md (add new ones there first). Mark which lines Chris voices.
 
 Then write footage/<slug>/shot-list.md with just the shot list (for faceless/brainrot: the voice lines Chris records, plus the shots the animator makes). This creates the footage folder, so Chris knows exactly where to drop his clips.

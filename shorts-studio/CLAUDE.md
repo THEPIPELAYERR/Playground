@@ -7,7 +7,7 @@ Every Short is one type. Read styles/README.md, then the type's own file, before
 - fragrance (styles/fragrance.md): Fragrance Shorts, launch first. Funnels to decant sales.
 - gaming (styles/gaming.md): ThePipeLayer. ARC Raiders, Yu-Gi-Oh Master Duel, chess.
 - faceless (styles/faceless.md): "What if X for N seconds?" code-built simulations.
-- brainrot (styles/brainrot.md): recurring original AI characters in short absurd stories.
+- brainrot (styles/brainrot.md): recurring original characters in short absurd stories, built in code (free) or with AI video (credits).
 If Chris doesn't say a type, ask him.
 
 ## Workflow for every Short
@@ -15,7 +15,7 @@ If Chris doesn't say a type, ask him.
 2. `scriptwriter` → script for the picked idea into scripts/<slug>.md, starting with `type: <type>`.
 3. Visuals into footage/<slug>/:
    - fragrance / gaming: Chris films or captures (the scriptwriter creates the folder with a shot-list.md).
-   - faceless / brainrot: `animator` builds or prompts the shots and checks its own frames. Brainrot stops for Chris's OK before any credits are spent. Chris still records his voice lines.
+   - faceless / brainrot: `animator` builds or prompts the shots and checks its own frames. Brainrot route: ai stops for Chris's OK before any credits are spent; route: code needs none. Chris still records his voice lines.
 4. `editor` → cut, captions, 9:16 render into renders/<slug>.mp4, plus render notes in renders/<slug>.notes.md.
 5. Automatic checks run by hook (size 1080x1920, under the type's max length, has audio, has a script with a type, has render notes). Fix any failures before stopping. To re-check any render by hand: `tools/check-renders.sh renders/<slug>.mp4`.
 6. `policy-checker` reviews the script and render notes (implementer/reviewer pair). If it fails, send it back to the editor with the fixes, at most 2 rounds.
