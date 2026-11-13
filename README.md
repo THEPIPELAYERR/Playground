@@ -1,6 +1,6 @@
 # Playground
 
-Experiments built with Claude, with no plan and no rules. Each folder is one experiment.
+Experiments built with Claude, with no plan and no rules. Each folder is one experiment, and every change is checked automatically before it lands.
 
 | Experiment | What it is |
 |---|---|
