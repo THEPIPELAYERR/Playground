@@ -261,7 +261,7 @@ S.glass = (t, l) => {
     const p = ease((l - at) / 0.35); if (p <= 0) return;
     const press = l - at > 0.35 && l - at < 0.5 ? 0.04 : 0;
     x.save(); x.translate(fx, fy + (1 - p) * 900); x.scale(1 + press, 1 - press); x.translate(-fx, -fy);
-    person(fx, fy + Math.sin(t * 2 + i) * 6, fr, v(key, { look: [(540 - fx) / 600, 0.1], blink: blinkAt(t, i * 3 + 1), talk: crowd ? crowd : 0.25 + 0.15 * Math.sin(t * 3 + i), headRot: Math.sin(t * 1.3 + i) * 0.06, expr: key === 'bald' || key === 'trucker' ? 'laugh' : 'grin', tongue: key === 'trucker' && l > 2.8 ? 1 : 0, breath: Math.sin(t * 2 + i) }));
+    person(fx, fy + Math.sin(t * 2 + i) * 6, fr, v(key, { look: [(540 - fx) / 600, 0.1], blink: blinkAt(t, i * 3 + 1), talk: crowd ? crowd : 0.25 + 0.15 * Math.sin(t * 3 + i), headRot: Math.sin(t * 1.3 + i) * 0.06, expr: key === 'bald' || key === 'trucker' ? 'laugh' : 'grin', tongue: key === 'trucker' ? ease((l - 2.6) / 0.35) : 0, tongueSway: Math.sin(t * 7) * 0.12, breath: Math.sin(t * 2 + i) }));
     x.restore();
   });
   // palms slapping onto the glass
@@ -271,6 +271,14 @@ S.glass = (t, l) => {
     x.save(); x.globalAlpha = p; hand(hx, hy, hr * s, rot, 'palm', CAST[key].skin); x.restore();
   });
   x.drawImage(bg.glassFx, 0, 0);
+  // the trucker licking the glass leaves a wet smear that keeps growing
+  const lick = clamp((l - 2.8) / 3, 0, 1);
+  if (lick > 0) {
+    x.save(); x.globalCompositeOperation = 'lighter';
+    for (let k = 0; k < 5; k++) { const a = k / 5 * lick; x.globalAlpha = 0.07; x.fillStyle = '#ffd6de'; x.beginPath(); x.ellipse(820 + Math.sin(a * 40) * 20, 770 + a * 50, 16 + 6 * lick, 14 + 26 * lick, 0, 0, Math.PI * 2); x.fill(); }
+    x.globalAlpha = 0.35 * lick; x.strokeStyle = '#ffffff'; x.lineWidth = 3; x.lineCap = 'round'; x.beginPath(); x.moveTo(806, 760); x.quadraticCurveTo(800, 790 + 30 * lick, 810, 800 + 50 * lick); x.stroke();
+    x.restore();
+  }
   // the door swings shut from the right, then the lock turns
   doorFrame((1 - ease(l / 0.18)) * 800);
   const turn = ease((l - 0.25) / 0.12) * Math.PI / 2;

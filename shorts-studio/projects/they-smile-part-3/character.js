@@ -178,11 +178,20 @@ function person(cx, cy, r, p) {
     x.save(); x.clip(m);
     fillInk(path(q => { q.moveTo(-mw, 0.42); q.quadraticCurveTo(0, 0.5, mw, 0.42); q.lineTo(mw, 0.5); q.quadraticCurveTo(0, 0.62, -mw, 0.5); q.closePath(); }), '#f6f1e4', lw * 0.6);
     for (let k = -3; k <= 3; k++) ink(path(q => { q.moveTo(k * 0.09, 0.47); q.lineTo(k * 0.09, 0.56); }), lw * 0.45);
-    fillInk(path(q => q.ellipse(0, mb - 0.08, 0.2, 0.1, 0, 0, Math.PI * 2)), p.tongue ? '#e4707a' : '#c9545f', 0);
+    const mBot = (0.42 + mb) / 2;   // the visible bottom of the mouth
+    fillInk(path(q => q.ellipse(0, mBot - 0.05, 0.2, 0.09, 0, 0, Math.PI * 2)), p.tongue ? '#e4707a' : '#c9545f', 0);
     if (p.blood) fillInk(path(q => q.rect(-0.2, 0.5, 0.15, 0.04)), 'rgba(140,10,15,0.8)', 0);
     x.restore();
     ink(m, lw * 1.5);
-    if (p.tongue) { const tg = path(q => { q.moveTo(-0.14, mb - 0.08); q.quadraticCurveTo(-0.16, mb + 0.3, 0.02, mb + 0.32); q.quadraticCurveTo(0.18, mb + 0.3, 0.14, mb - 0.08); q.closePath(); }); fillInk(tg, '#e4707a', lw * 1.2); ink(path(q => { q.moveTo(0, mb); q.lineTo(0, mb + 0.2); }), lw * 0.6); }
+    if (p.tongue) {
+      const mB = (0.42 + mb) / 2, len = 0.34 * p.tongue, sw = p.tongueSway || 0, tw = 0.15;
+      const tip = [sw * 0.6, mB + len];
+      const tg = path(q => { q.moveTo(-tw, mB - 0.06); q.bezierCurveTo(-tw - 0.02, mB + len * 0.6, tip[0] - tw * 0.9, tip[1] + 0.04, tip[0], tip[1] + 0.04); q.bezierCurveTo(tip[0] + tw * 0.9, tip[1] + 0.04, tw + 0.02, mB + len * 0.6, tw, mB - 0.06); q.closePath(); });
+      fillInk(tg, '#e4707a', lw * 1.2);
+      ink(path(q => { q.moveTo(0, mB - 0.02); q.quadraticCurveTo(sw * 0.3, mB + len * 0.5, tip[0], tip[1] - 0.06); }), lw * 0.7);   // centre groove
+      x.fillStyle = 'rgba(255,255,255,0.5)'; x.beginPath(); x.ellipse(-tw * 0.45 + sw * 0.3, mB + len * 0.45, 0.025, len * 0.22 + 0.01, 0, 0, Math.PI * 2); x.fill();   // wet shine
+      ink(path(q => { q.moveTo(-mw * 0.55, mB - 0.01); q.quadraticCurveTo(0, mB + 0.03, mw * 0.55, mB - 0.01); }), lw * 1.2);   // lower lip line over the tongue root
+    }
     for (const sd of [-1, 1]) ink(path(q => { q.moveTo(sd * 0.2, 0.2); q.quadraticCurveTo(sd * (mw + 0.12), 0.32, sd * (mw + 0.05), 0.55); }), lw * 1.1);
   } else if (e === 'scared' || e === 'whisper') {
     const ow = (e === 'scared' ? 0.15 : 0.1) * (0.75 + 0.5 * talk), bot = 0.56 + (e === 'scared' ? 0.2 : 0.1) * (0.45 + 0.9 * talk);
