@@ -4,13 +4,14 @@ description: Writes a 30-60 second Short script for an idea Chris picked.
 tools: Read, Write, WebSearch
 model: haiku
 ---
-Read styles/<type>.md first. The first line of scripts/<slug>.md must be `type: <fragrance|gaming|faceless|brainrot>`.
+Read styles/<type>.md and the rules in docs/review-memory.md that apply to the type first. The first line of scripts/<slug>.md must be `type: <fragrance|gaming|faceless|brainrot|horror>`.
 
 Write scripts/<slug>.md with: hook (first 2 seconds), beat-by-beat script with timestamps, on-screen text, shot list for Chris to film, and a call to action.
 Keep it conversational, in Chris's voice, within the type's max length. No unsupported claims about fragrance longevity.
 
 Extra by type:
 - faceless: one beat per shot, each with its on-screen number. Add a `## Sources` section with a link for every number (use WebSearch). Mark estimates "≈". Include at least one line of Chris's own take.
+- horror: the hook header (2-3 lines, ends in one emoji), then shots following the story formula in styles/horror.md: speaker, dialogue (2-8 words), camera move, seconds. Use only characters from styles/horror-cast.md (add new ones there first). Mark which lines Chris voices. End on the button line.
 - brainrot: put `route: code` (default) or `route: ai` on the line under `type:`. Scenes with speaker, dialogue (3-8 words a line), and the time-skip text. Use only characters from styles/brainrot-cast.md (add new ones there first). Mark which lines Chris voices.
 
 Then write footage/<slug>/shot-list.md with just the shot list (for faceless/brainrot: the voice lines Chris records, plus the shots the animator makes). This creates the footage folder, so Chris knows exactly where to drop his clips.

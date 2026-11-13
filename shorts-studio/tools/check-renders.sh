@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Automatic checks on renders: 1080x1920, under the type's max length, has audio,
-# has a matching script with a type line, has render notes.
+# has a matching script with a type line, has render notes, and passed the debug loop
+# (renders/<slug>.review/review.md ends in "Result: PASS" or "Result: ESCALATED").
 # Max length by type: brainrot 90s, everything else 60s (see styles/README.md).
 # As a Stop hook (no args): checks renders changed in the last 15 minutes.
 #   Exit 2 = block and tell Claude what to fix.
@@ -30,8 +31,8 @@ check() {
     type=$(grep -m1 -E '^type:' "scripts/$slug.md" | sed -E 's/^type:[[:space:]]*//; s/[[:space:]]*$//')
     case "$type" in
       brainrot) max=90 ;;
-      fragrance|gaming|faceless) max=60 ;;
-      "") echo "$f: scripts/$slug.md has no 'type:' line (fragrance, gaming, faceless, or brainrot)" >&2; fail=1 ;;
+      fragrance|gaming|faceless|horror) max=60 ;;
+      "") echo "$f: scripts/$slug.md has no 'type:' line (fragrance, gaming, faceless, brainrot, or horror)" >&2; fail=1 ;;
       *) echo "$f: unknown type '$type' in scripts/$slug.md" >&2; fail=1 ;;
     esac
   fi
@@ -40,6 +41,16 @@ check() {
   [ -z "$audio" ] && { echo "$f: no audio track" >&2; fail=1; }
   [ ! -f "scripts/$slug.md" ] && { echo "$f: no matching script in scripts/$slug.md" >&2; fail=1; }
   [ ! -f "renders/$slug.notes.md" ] && { echo "$f: no render notes in renders/$slug.notes.md" >&2; fail=1; }
+  local rv="renders/$slug.review/review.md" res
+  if [ ! -f "$rv" ]; then
+    echo "$f: no debug-loop review. Run tools/debug-loop.sh $f and fill in $rv" >&2; fail=1
+  else
+    res=$(grep -E '^Result:' "$rv" | tail -1 | sed -E 's/^Result:[[:space:]]*//')
+    case "$res" in
+      PASS*|ESCALATED*) ;;
+      *) echo "$f: debug loop not finished ($rv says 'Result: ${res:-none}'). Fix the FAIL rows, re-render, run tools/debug-loop.sh again (max 3 rounds, then ESCALATED)" >&2; fail=1 ;;
+    esac
+  fi
 }
 
 if [ $# -gt 0 ]; then

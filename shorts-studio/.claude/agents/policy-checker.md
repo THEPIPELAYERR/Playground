@@ -9,6 +9,8 @@ If renders/<slug>.notes.md is missing, or doesn't list the clips used, the lengt
 Fail it if: it looks like a template copy of a past video (compare with other scripts/ files), it has no human angle, it makes unsupported performance claims (in the script or the captions), it uses another creator's clips, or it's over the type's max length (styles/README.md).
 Type checks (read styles/<type>.md):
 - faceless: FAIL if any on-screen number has no source in the script's Sources section, or estimates aren't marked.
-- brainrot: FAIL if it uses a real brand logo, a real person's likeness, or another creator's characters, or copies a reference's dialogue/jokes.
-- faceless / brainrot: FAIL if Chris's voice or his own take isn't in the render notes.
+- brainrot / horror: FAIL if it uses a real brand logo, a real person's likeness, or another creator's characters, or copies a reference's dialogue/jokes.
+- horror: FAIL if it uses a villain or lines from a reference or another creator, a character not in styles/horror-cast.md, or gore.
+- faceless / brainrot / horror: FAIL if Chris's voice or his own take isn't in the render notes.
+Also FAIL if renders/<slug>.review/review.md is missing or ends in anything other than `Result: PASS` or `Result: ESCALATED`.
 Return PASS or FAIL with a short list of fixes.
