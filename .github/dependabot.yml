@@ -1,11 +1,16 @@
-# Dependabot: weekly update PRs for Python packages and GitHub Actions.
+# Dependabot: weekly update PRs for Python packages and GitHub Actions (including the pinned
+# action SHAs). Waits 7 days after a release before proposing it, in case it's malicious or broken.
 version: 2
 updates:
   - package-ecosystem: pip
     directory: /volatile-finder
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
