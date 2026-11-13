@@ -40,7 +40,7 @@ Dialogue lines are 2-8 words, one speaker per shot. Lines sound spoken, not writ
 
 ## Sound
 - Voice acting, not narration: each character has a voice (Chris voices at least one, or a voice
-  cloned from his recordings). Robotic TTS (flite, espeak, old system voices) is never acceptable.
+  cloned from his recordings with VoiceStudio, see docs/toolbox.md). Robotic TTS (flite, espeak, old system voices) is never acceptable.
   See docs/review-memory.md.
 - Under the villain: a music-box or detuned carnival loop, then a low drone. Silence for half a
   second right before the button line, then a hit.

@@ -35,7 +35,10 @@ docs/review-memory.md holds every quality rule learned from past feedback. Befor
 ## Setup (free, one time)
 - FFmpeg (includes ffprobe): `brew install ffmpeg` (Mac) or `sudo apt install ffmpeg` (Linux) or `winget install ffmpeg` (Windows).
 - Whisper: `pip install -U openai-whisper` (needs Python 3.9+ and FFmpeg). Check it with `whisper --help`.
+- Voices: VoiceStudio (free, local voice cloning). One-time voice setup in docs/toolbox.md: clone Chris's voice and each recurring character's voice.
+- Code-built video: HyperFrames (`npx skills add heygen-com/hyperframes`, needs Node 22+; get it with nvm: `nvm install 22`).
 - Without these, the editor stops and says what's missing, and the render hook warns but doesn't block.
+- docs/toolbox.md maps every tool from Chris's starred GitHub repos to the step it helps with.
 
 ## Weekly
 - Chris exports stats into stats/. Run `analytics` for the weekly report and ideas/next-week.md.
@@ -44,6 +47,6 @@ docs/review-memory.md holds every quality rule learned from past feedback. Befor
 - Every video needs a human angle (Chris's opinion, face, or voice). For faceless, brainrot, and horror that means his own story/joke picks plus his voice (or a TTS voice cloned from his own recordings). No near-identical template videos: series share a format, never the same script.
 - No real brand logos, real people's likeness, or other creators' characters in AI visuals.
 - Never claim performance hours for fragrances unless Chris tested them; label estimates as estimates.
-- Free tools first (FFmpeg, Whisper, CapCut). Ask before any paid tool or credits.
+- Free tools first (FFmpeg, Whisper, HyperFrames, VoiceStudio, CapCut; see docs/toolbox.md). Ask before any paid tool or credits.
 - Log decisions, errors, and fixes in docs/log.md.
 - Run /compact when context gets past about half full.
