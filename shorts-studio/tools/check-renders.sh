@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Automatic checks on renders: 1080x1920, 60s or less, has audio, has a matching script.
+# Automatic checks on renders: 1080x1920, under the type's max length, has audio,
+# has a matching script with a type line, has render notes.
+# Max length by type: brainrot 90s, everything else 60s (see styles/README.md).
 # As a Stop hook (no args): checks renders changed in the last 15 minutes.
 #   Exit 2 = block and tell Claude what to fix.
 # Manually / from cross-poster: tools/check-renders.sh renders/<slug>.mp4 [...]
@@ -14,7 +16,7 @@ fi
 
 fail=0
 check() {
-  local f="$1" slug dur size audio
+  local f="$1" slug dur size audio type max
   slug=$(basename "$f" .mp4)
   if [ ! -f "$f" ]; then echo "$f: file not found" >&2; fail=1; return; fi
   dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" 2>/dev/null)
@@ -23,8 +25,18 @@ check() {
   if [ -z "$dur" ] || [ -z "$size" ]; then
     echo "$f: ffprobe could not read it (corrupt or unfinished render?)" >&2; fail=1; return
   fi
+  type=""; max=60
+  if [ -f "scripts/$slug.md" ]; then
+    type=$(grep -m1 -E '^type:' "scripts/$slug.md" | sed -E 's/^type:[[:space:]]*//; s/[[:space:]]*$//')
+    case "$type" in
+      brainrot) max=90 ;;
+      fragrance|gaming|faceless) max=60 ;;
+      "") echo "$f: scripts/$slug.md has no 'type:' line (fragrance, gaming, faceless, or brainrot)" >&2; fail=1 ;;
+      *) echo "$f: unknown type '$type' in scripts/$slug.md" >&2; fail=1 ;;
+    esac
+  fi
   [ "$size" != "1080x1920" ] && { echo "$f: size is $size, must be 1080x1920" >&2; fail=1; }
-  awk -v d="$dur" 'BEGIN{exit !(d > 60)}' && { echo "$f: ${dur}s long, must be 60s or less" >&2; fail=1; }
+  awk -v d="$dur" -v m="$max" 'BEGIN{exit !(d > m)}' && { echo "$f: ${dur}s long, must be ${max}s or less for type ${type:-unknown}" >&2; fail=1; }
   [ -z "$audio" ] && { echo "$f: no audio track" >&2; fail=1; }
   [ ! -f "scripts/$slug.md" ] && { echo "$f: no matching script in scripts/$slug.md" >&2; fail=1; }
   [ ! -f "renders/$slug.notes.md" ] && { echo "$f: no render notes in renders/$slug.notes.md" >&2; fail=1; }
