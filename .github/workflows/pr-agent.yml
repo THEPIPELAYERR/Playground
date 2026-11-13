@@ -3,7 +3,7 @@
 # Until that secret exists, this job skips itself instead of failing.
 # Costs a few cents of API usage per PR. Comment "/review" or "/improve" on a PR to re-run.
 # Runs only for trusted authors (see the job's if:), so strangers can't steer it or spend the key.
-name: pr-agent
+name: anthropic/claude-haiku-4-5-20251001
 on:
   pull_request:
     types: [opened, reopened, ready_for_review]
