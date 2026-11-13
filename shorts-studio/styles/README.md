@@ -1,7 +1,7 @@
 # Video types
 
 Every Short has exactly one type. The scriptwriter puts it at the top of scripts/<slug>.md as `type: <name>`,
-and every agent reads the matching style file before working.
+and every agent reads the matching style file before working, plus the rules in docs/review-memory.md that apply to it.
 
 | Type | File | Visuals come from | Chris's part | Max length |
 |---|---|---|---|---|
@@ -9,5 +9,6 @@ and every agent reads the matching style file before working.
 | gaming | gaming.md | Chris's gameplay capture | voiceover/commentary | 60s |
 | faceless | faceless.md | code-built 3D simulation (animator) | script choices + voiceover | 60s |
 | brainrot | brainrot.md | code-built cartoon (free, default) or AI image → video clips (credits) | jokes/story picks + at least one voice | 90s |
+| horror | horror.md | AI anime image → video clips (credits), framed in a fixed layout | story picks + at least one character voice | 60s |
 
 The max length is enforced by tools/check-renders.sh.

@@ -1,10 +1,10 @@
 ---
 name: animator
-description: Makes the visuals for faceless and brainrot Shorts (code-built simulations and cartoons, or AI prompt packs) and checks its own frames. Use after the script, before the editor.
+description: Makes the visuals for faceless, brainrot, and horror Shorts (code-built simulations and cartoons, or AI prompt packs) and checks its own frames. Use after the script, before the editor.
 tools: Read, Write, Edit, Bash
 model: sonnet
 ---
-Read scripts/<slug>.md, its `type:` line, and the matching file in styles/.
+Read scripts/<slug>.md, its `type:` line, the matching file in styles/, and the rules in docs/review-memory.md that apply to the type (walk cycles, scale, and so on). Follow them while building, not just when checking.
 
 ## type: faceless
 1. Build the simulation in code under footage/<slug>/sim/ (Three.js rendered headless, or Remotion). One shot per beat in the script.
@@ -26,7 +26,12 @@ Read scripts/<slug>.md, its `type:` line, and the matching file in styles/.
 2. Stop and tell Chris how many clips need generating and which tool. Never spend credits without his OK.
 3. When the clips are in footage/<slug>/, continue to the self-check.
 
-## Self-check (both types)
+## type: horror
+1. Write prompts/<slug>.json the same way as brainrot route: ai, but `"aspect_ratio": "16:9"` (the editor frames it in the 9:16 layout), the anime look from styles/horror.md, and each character's description pasted word for word from styles/horror-cast.md.
+2. Every video_prompt names a camera move (push-in, handheld drift, whip-pan). No gore.
+3. Stop and tell Chris how many clips and which tool. Never spend credits without his OK.
+
+## Self-check (all types)
 For each shot, pull 3 frames (`ffmpeg -ss <t> -i <clip> -frames:v 1 footage/<slug>/check/<shot>-<n>.png`) and look at them.
 List problems the way a viewer would see them (feet cut off, character looks different from the last shot, text unreadable, steam too faint, extra fingers).
 Fix what you can (faceless: change the code and re-render; brainrot: rewrite that scene's prompt and ask for a re-roll). Max 2 rounds per shot.
