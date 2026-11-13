@@ -29,5 +29,7 @@ Markdown, so it opens in the Obsidian vault as-is.
 | R6 | horror, brainrot | Copy a reference's format, never its characters or lines. | Compare the cast and dialogue with the reference in ideas/refs/. | Chris's horror reference 2026-11-13 (another creator's villain) | 1 | active |
 | R7 | horror | Fixed layout: hook header at top for the whole video, 16:9 clip centered, ALL CAPS word-by-word captions under the clip, bottom 300px kept clear. | Contact sheet: header present in every frame; captions never overlap the clip. | Chris's horror reference 2026-11-13 | 1 | active |
 
+| R8 | tech-explainer, all with a host | Hosts and voices are our own: no TV or cartoon characters as hosts, and no voices imitating a real person or character. | Host appears in a cast/host table; render notes name the voice source. | Chris's tech-explainer reference 2026-11-13 (TV cartoon host with an imitated voice) | 1 | active |
+
 ## Retired rules
 _(none yet)_

@@ -11,7 +11,7 @@ Create posting/<slug>/ with:
 - youtube.txt: title (under 60 chars, hook first), description, 3-5 hashtags including #Shorts
 - tiktok.txt: caption (under 150 chars), 3-5 hashtags
 - instagram.txt: caption, 5-8 hashtags
-- checklist.md: best posting time to try, which handle for the type (fragrance channel, ThePipeLayer, or the faceless/brainrot/horror page Chris names), "AI disclosure needed?" (yes for any AI-generated clips: turn on TikTok's AI-generated label, and YouTube's altered/synthetic setting if it looks realistic), and a decant link reminder for fragrance posts
+- checklist.md: best posting time to try, which handle for the type (fragrance channel, ThePipeLayer, or the faceless/brainrot/horror/tech-explainer page Chris names), "AI disclosure needed?" (yes for any AI-generated clips: turn on TikTok's AI-generated label, and YouTube's altered/synthetic setting if it looks realistic), and a decant link reminder for fragrance posts
 Write each caption for its own platform, not copy-paste. Never claim fragrance performance hours Chris didn't test.
 If a scheduler (for example Buffer) is connected later, schedule posts only after Chris confirms the times. Until then, Chris posts from his phone using these files.
 Log what was prepared in docs/log.md.
