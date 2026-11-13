@@ -1,7 +1,7 @@
 # PR-Agent: AI review, description, and suggestions on every pull request, using Claude.
 # Setup: add a repo secret named ANTHROPIC_KEY (Settings → Secrets and variables → Actions).
 # Until that secret exists, this job skips itself instead of failing.
-# Costs a few cents of API usage per PR. Comment "/review" or "/improve" on a PR to re-run.
+# Uses Claude Haiku 4.5 (cheapest) to keep costs to a few cents per PR. Comment "/review" or "/improve" on a PR to re-run.
 # Runs only for trusted authors (see the job's if:), so strangers can't steer it or spend the key.
 name: anthropic/claude-haiku-4-5-20251001
 on:
@@ -39,8 +39,8 @@ jobs:
         uses: the-pr-agent/pr-agent@e673a02076ce09a4726c3d0c3cc85780e59ca52b # v0.50.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          config.model: "anthropic/claude-opus-5"
-          config.fallback_models: '["anthropic/claude-haiku-4-5-20251001"]'
+          config.model: "anthropic/claude-haiku-4-5-20251001"
+          config.fallback_models: '["anthropic/claude-sonnet-4-5-20250929"]'
           ANTHROPIC.KEY: ${{ secrets.ANTHROPIC_KEY }}
           github_action_config.auto_review: "true"
           github_action_config.auto_describe: "true"
