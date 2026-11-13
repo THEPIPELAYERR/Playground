@@ -7,7 +7,7 @@ model: sonnet
 Read scripts/<slug>.md, its `type:` line, the matching file in styles/, and the rules in docs/review-memory.md that apply to the type (walk cycles, scale, and so on). Follow them while building, not just when checking.
 
 ## type: faceless
-1. Build the simulation in code under footage/<slug>/sim/ (Three.js rendered headless, or Remotion). One shot per beat in the script.
+1. Build the simulation in code under footage/<slug>/sim/ (HyperFrames is the default: an HTML composition with a Three.js or GSAP adapter, rendered with `npx hyperframes render`; Remotion or plain Three.js also work). For motion feel (easing, timing, follow-through) use the emilkowalski/skills animation guidance if it's installed (docs/toolbox.md). One shot per beat in the script.
 2. Render each shot to footage/<slug>/shot-NN.mp4 at 1080x1920, 30fps. If Node or a renderer is missing, stop and report the install command. Don't switch to a paid service.
 3. Use only the numbers in the script's Sources section for counters and labels.
 
