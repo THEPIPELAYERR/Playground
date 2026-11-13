@@ -10,5 +10,6 @@ and every agent reads the matching style file before working, plus the rules in 
 | faceless | faceless.md | code-built 3D simulation (animator) | script choices + voiceover | 60s |
 | brainrot | brainrot.md | code-built cartoon (free, default) or AI image → video clips (credits) | jokes/story picks + at least one voice | 90s |
 | horror | horror.md | AI anime image → video clips (credits), framed in a fixed layout | story picks + at least one character voice | 60s |
+| tech-explainer | tech-explainer.md | code-built cards + original host (HyperFrames, free) | list picks, his own take on items, voice | 180s |
 
 The max length is enforced by tools/check-renders.sh.

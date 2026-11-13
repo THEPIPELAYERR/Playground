@@ -2,7 +2,7 @@
 # Automatic checks on renders: 1080x1920, under the type's max length, has audio,
 # has a matching script with a type line, has render notes, and passed the debug loop
 # (renders/<slug>.review/review.md ends in "Result: PASS" or "Result: ESCALATED").
-# Max length by type: brainrot 90s, everything else 60s (see styles/README.md).
+# Max length by type: tech-explainer 180s, brainrot 90s, everything else 60s (see styles/README.md).
 # As a Stop hook (no args): checks renders changed in the last 15 minutes.
 #   Exit 2 = block and tell Claude what to fix.
 # Manually / from cross-poster: tools/check-renders.sh renders/<slug>.mp4 [...]
@@ -31,8 +31,9 @@ check() {
     type=$(grep -m1 -E '^type:' "scripts/$slug.md" | sed -E 's/^type:[[:space:]]*//; s/[[:space:]]*$//')
     case "$type" in
       brainrot) max=90 ;;
+      tech-explainer) max=180 ;;
       fragrance|gaming|faceless|horror) max=60 ;;
-      "") echo "$f: scripts/$slug.md has no 'type:' line (fragrance, gaming, faceless, brainrot, or horror)" >&2; fail=1 ;;
+      "") echo "$f: scripts/$slug.md has no 'type:' line (fragrance, gaming, faceless, brainrot, horror, or tech-explainer)" >&2; fail=1 ;;
       *) echo "$f: unknown type '$type' in scripts/$slug.md" >&2; fail=1 ;;
     esac
   fi
