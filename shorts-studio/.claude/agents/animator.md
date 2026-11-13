@@ -26,6 +26,11 @@ Read scripts/<slug>.md, its `type:` line, the matching file in styles/, and the 
 2. Stop and tell Chris how many clips need generating and which tool. Never spend credits without his OK.
 3. When the clips are in footage/<slug>/, continue to the self-check.
 
+## type: tech-explainer
+1. Build the episode as one HyperFrames composition under footage/<slug>/sim/ from the look in styles/tech-explainer.md. Reuse footage/_sets/tech-explainer/ (top bar, rank intro, card types, ending grid) and footage/_cast/<host>.js; build them the first time and save them there.
+2. Time each card and list line to the voice lines' Whisper word timestamps. Use only numbers from the script's Sources section.
+3. Render to footage/<slug>/shot-01.mp4 at 1080x1920, 30fps.
+
 ## type: horror
 1. Write prompts/<slug>.json the same way as brainrot route: ai, but `"aspect_ratio": "16:9"` (the editor frames it in the 9:16 layout), the anime look from styles/horror.md, and each character's description pasted word for word from styles/horror-cast.md.
 2. Every video_prompt names a camera move (push-in, handheld drift, whip-pan). No gore.

@@ -4,6 +4,7 @@ These run automatically on every pull request and push (files in .github/):
 
 | Tool | What it catches | Cost |
 |---|---|---|
+| All workflow actions are pinned to exact commit SHAs (Dependabot keeps them updated), so a hijacked tag can't slip in malicious code. | |
 | CodeQL (`codeql.yml`) | Security bugs in Python, JavaScript, and the workflows themselves. Results: Security tab → Code scanning. | Free (public repo) |
 | Semgrep (`semgrep.yml`) | Rule-based security and bug patterns. Fails the check if it finds something. | Free |
 | Gitleaks (`gitleaks.yml`) | API keys, passwords, and tokens in commits. Also runs daily. | Free (personal account) |

@@ -9,6 +9,7 @@ Every Short is one type. Read styles/README.md, then the type's own file, before
 - faceless (styles/faceless.md): "What if X for N seconds?" code-built simulations.
 - brainrot (styles/brainrot.md): recurring original characters in short absurd stories, built in code (free) or with AI video (credits).
 - horror (styles/horror.md): anime horror stories with our own recurring villains, a fixed hook header, and voice-acted dialogue. AI video (credits).
+- tech-explainer (styles/tech-explainer.md): ranked tech lists (GitHub repos, AI tools, apps) on editorial cards with an original mascot host, built in code with HyperFrames (free).
 If Chris doesn't say a type, ask him.
 
 ## Review memory (read first)
@@ -19,7 +20,7 @@ docs/review-memory.md holds every quality rule learned from past feedback. Befor
 2. `scriptwriter` → script for the picked idea into scripts/<slug>.md, starting with `type: <type>`.
 3. Visuals into footage/<slug>/:
    - fragrance / gaming: Chris films or captures (the scriptwriter creates the folder with a shot-list.md).
-   - faceless / brainrot / horror: `animator` builds or prompts the shots and checks its own frames. Brainrot route: ai and all horror stop for Chris's OK before any credits are spent; brainrot route: code needs none. Chris still records his voice lines.
+   - faceless / brainrot / horror / tech-explainer: `animator` builds or prompts the shots and checks its own frames. Brainrot route: ai and all horror stop for Chris's OK before any credits are spent; brainrot route: code needs none. Chris still records his voice lines.
 4. `editor` → cut, captions, 9:16 render into renders/<slug>.mp4, plus render notes in renders/<slug>.notes.md.
 5. **Debug loop** (you run this yourself, on Opus, because it needs eyes):
    1. `tools/debug-loop.sh renders/<slug>.mp4` builds a review packet in renders/<slug>.review/ (contact sheet, a frame after every cut, mid-scene frames, loudness per section, automatic flags) and adds a round to review.md with one row per active rule.
@@ -44,7 +45,7 @@ docs/review-memory.md holds every quality rule learned from past feedback. Befor
 - Chris exports stats into stats/. Run `analytics` for the weekly report and ideas/next-week.md.
 
 ## Rules
-- Every video needs a human angle (Chris's opinion, face, or voice). For faceless, brainrot, and horror that means his own story/joke picks plus his voice (or a TTS voice cloned from his own recordings). No near-identical template videos: series share a format, never the same script.
+- Every video needs a human angle (Chris's opinion, face, or voice). For faceless, brainrot, horror, and tech-explainer that means his own story/joke picks plus his voice (or a TTS voice cloned from his own recordings). No near-identical template videos: series share a format, never the same script.
 - No real brand logos, real people's likeness, or other creators' characters in AI visuals.
 - Never claim performance hours for fragrances unless Chris tested them; label estimates as estimates.
 - Free tools first (FFmpeg, Whisper, HyperFrames, VoiceStudio, CapCut; see docs/toolbox.md). Ask before any paid tool or credits.

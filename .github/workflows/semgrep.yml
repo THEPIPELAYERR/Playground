@@ -15,7 +15,7 @@ jobs:
       image: semgrep/semgrep
     if: (github.actor != 'dependabot[bot]')
     steps:
-      - uses: actions/checkout@v6
-      - run: semgrep scan --config auto --error
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - run: semgrep scan --config p/default --error
         env:
           SEMGREP_SEND_METRICS: "off"
