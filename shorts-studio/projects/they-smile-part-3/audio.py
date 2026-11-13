@@ -1,4 +1,4 @@
-"""Sound design for "They Smile - Part 3" (motion comic). Synthesized, no samples, no licenses needed.
+"""Sound design for "They Smile - Part 3" (2D animation). Synthesized, no samples, no licenses needed.
 Usage: python3 audio.py timeline.json out.wav
 """
 import json, sys, wave
@@ -64,7 +64,7 @@ def laugh(n, f0=170.0, rate=0.17, seed=0):
 
 
 
-sh = [s[0] for s in tl["shots"]]
+sh = [s_[0] for s_ in tl["shots"]]
 endcard = tl["endCard"]; impact = tl["impact"]; lock = tl["lock"]; reveal = tl["reveal"]
 
 # outside gets muffled once he locks the door
@@ -159,10 +159,14 @@ for off, f in notes:
     voice = filt(sum(np.sin(k * ph) / k ** 1.3 for k in range(1, 14)), 150, 1300)
     add(voice * np.minimum(1, s / 0.15) * np.clip((0.95 - s) / 0.3, 0, 1), reveal + 0.9 + off, 0.07)
 
-# ---- soft paper whoosh on each panel change
-for at in sh[1:]:
-    s = seg(0.3)
-    add(filt(rng.standard_normal(len(s)), 800, 6000) * np.sin(np.pi * s / 0.3) ** 2, at - 0.05, 0.05)
+# ---- animation sync: the tire-iron swing, palms slapping the glass, the whip pan into Grandma
+s = seg(0.22)
+add(filt(rng.standard_normal(len(s)), 300, 4000) * np.sin(np.pi * s / 0.22) ** 2 * (s / 0.22), impact - 0.04, 0.45)
+for at in tl.get("slaps", []):
+    s = seg(0.15)
+    add(filt(rng.standard_normal(len(s)), 400, 5000) * env(len(s), 0.0005, 0.02) * 2 + np.sin(2 * np.pi * 180 * s) * env(len(s), 0.001, 0.03), at, 0.3, pan=float(np.sin(at * 7)) * 0.6)
+s = seg(0.5)
+add(filt(rng.standard_normal(len(s)), 500, 7000) * np.sin(np.pi * s / 0.5) ** 2, tl.get("whip", reveal - 0.5), 0.4)
 
 # ---- end card: the series' music-box notes
 for at, f in ((endcard + 0.4, 1046.5), (endcard + 1.2, 987.8), (endcard + 2.2, 1396.9)):

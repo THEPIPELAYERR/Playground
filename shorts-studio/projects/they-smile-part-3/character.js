@@ -1,4 +1,5 @@
-// Comic art kit for "They Smile". Ink outlines, flat colour, one cel-shadow tone with halftone dots.
+// Animation character kit for "They Smile". Clean cartoon lines, flat colour, one soft cel-shadow tone.
+// Characters take animation params: talk (mouth open 0..1), blink (0..1), headRot, bodyDx, breath, look.
 // Everything draws into the global context `x` (swap it to draw into an offscreen panel).
 let x;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
@@ -11,12 +12,7 @@ const INK = '#141012';
 function path(fn) { const p = new Path2D(); fn(p); return p; }
 function ink(p, w) { x.lineWidth = w; x.strokeStyle = INK; x.lineJoin = 'round'; x.lineCap = 'round'; x.stroke(p); }
 function fillInk(p, fill, w) { x.fillStyle = fill; x.fill(p); if (w) ink(p, w); }
-function halftone(p, color, step, rad, bb) {
-  x.save(); x.clip(p); x.fillStyle = color;
-  let row = 0;
-  for (let yy = bb[1]; yy < bb[3]; yy += step, row++) for (let xx = bb[0] + (row % 2) * step / 2; xx < bb[2]; xx += step) { x.beginPath(); x.arc(xx, yy, rad, 0, Math.PI * 2); x.fill(); }
-  x.restore();
-}
+function halftone() { /* comic-only effect: off in the animated style */ }
 function blobPath(cx, cy, rad, r, n = 9, jag = 0.35) {
   return path(p => { for (let i = 0; i <= n; i++) { const a = i / n * Math.PI * 2, rr = rad * (1 - jag / 2 + jag * r()); const px = cx + Math.cos(a) * rr, py = cy + Math.sin(a) * rr * 0.8; i ? p.lineTo(px, py) : p.moveTo(px, py); } p.closePath(); });
 }
@@ -26,15 +22,17 @@ function blobPath(cx, cy, rad, r, n = 9, jag = 0.35) {
 //      rash, look:[dx,dy], outfit, outfitColor, beard, stubble, glasses, tears, blood, seed, rot, tongue, name, ropes }
 function person(cx, cy, r, p) {
   x.save(); x.translate(cx, cy); x.rotate(p.rot || 0); x.scale(r * (p.flip ? -1 : 1), r);
-  const lw = Math.max(1.6, r * 0.022) / r;
+  const lw = Math.max(1.1, r * 0.013) / r;
   const sk = p.skin, skS = rgb(sk, 0.8), skD = rgb(sk, 0.62);
   const hc = p.hair.color;
   const R = rng(p.seed || 1);
   const F = !!p.female;
+  const talk = p.talk || 0, blink = p.blink || 0;
   // --- hair behind the head
   if (p.hair.style === 'long') fillInk(path(q => { q.moveTo(-0.86, -0.3); q.bezierCurveTo(-1.02, -1.28, 1.02, -1.28, 0.86, -0.3); q.lineTo(1.05, 1.75); q.lineTo(-1.05, 1.75); q.closePath(); }), rgb(hc, 0.75), lw * 1.2);
   if (p.hair.style === 'bun') { const b = path(q => q.arc(0.05, -1.02, 0.3, 0, Math.PI * 2)); fillInk(b, rgb(hc), lw * 1.2); halftone(b, rgb(hc, 0.75), 0.04, 0.012, [-0.3, -1.35, 0.4, -0.7]); }
-  // --- shoulders / clothes
+  // --- shoulders / clothes (they move with breathing / laughing)
+  x.save(); x.translate(p.bodyDx || 0, (p.breath || 0) * 0.03);
   const body = path(q => { q.moveTo(-1.55, 2.7); q.lineTo(-1.48, 1.8); q.quadraticCurveTo(-1.38, 1.32, -0.6, 1.16); q.lineTo(-0.3, 1.0); q.lineTo(0.3, 1.0); q.lineTo(0.6, 1.16); q.quadraticCurveTo(1.38, 1.32, 1.48, 1.8); q.lineTo(1.55, 2.7); q.closePath(); });
   const oc = p.outfitColor || [110, 120, 135];
   const base = p.outfit === 'vest' ? [128, 134, 142] : oc;
@@ -63,6 +61,9 @@ function person(cx, cy, r, p) {
     for (const [a, b] of [[[-1.5, 1.7], [1.5, 2.15]], [[-1.5, 2.15], [1.5, 1.75]], [[-1.5, 2.45], [1.5, 2.45]]]) { x.beginPath(); x.moveTo(...a); x.lineTo(...b); x.stroke(); }
     x.strokeStyle = INK; x.lineWidth = lw * 0.7; for (const [a, b] of [[[-1.5, 1.66], [1.5, 2.11]], [[-1.5, 1.74], [1.5, 2.19]], [[-1.5, 2.11], [1.5, 1.71]], [[-1.5, 2.19], [1.5, 1.79]]]) { x.beginPath(); x.moveTo(...a); x.lineTo(...b); x.stroke(); }
   }
+  x.restore();
+  // head turns / tilts around the neck
+  x.save(); x.translate(0, 1.0); x.rotate(p.headRot || 0); x.translate(0, -1.0);
   // --- neck
   const neck = path(q => q.rect(-0.27, 0.55, 0.54, 0.62));
   fillInk(neck, rgb(sk), lw);
@@ -151,6 +152,11 @@ function person(cx, cy, r, p) {
     x.restore();
     ink(path(q => { q.moveTo(ex - w * 1.05, ey + 0.01); q.quadraticCurveTo(ex, ey - h * 1.75, ex + w * 1.05, ey); }), lw * 2.0);
     ink(path(q => { q.moveTo(ex - w * 0.8, ey + h * low * 0.35); q.quadraticCurveTo(ex, ey + h * low * 0.55, ex + w * 0.9, ey + 0.005); }), lw * 0.7);
+    if (blink > 0.02) {
+      const top = ey - h * 1.8, lid = top + blink * (h * 1.8 + h * low * 0.6 + 0.01);
+      x.save(); x.clip(eye); x.fillStyle = sd > 0 ? skS : rgb(sk); x.fillRect(ex - w - 0.05, top - 0.05, w * 2 + 0.1, lid - top + 0.05); x.restore();
+      ink(path(q => { q.moveTo(ex - w, Math.min(lid, ey)); q.quadraticCurveTo(ex, lid + 0.01, ex + w, Math.min(lid, ey)); }), lw * 1.6);
+    }
     if (F) for (let k = 0; k < 3; k++) ink(path(q => { q.moveTo(ex + sd * (w - 0.01 * k), ey - 0.01 - k * 0.012); q.lineTo(ex + sd * (w + 0.05), ey - 0.04 - k * 0.025); }), lw * 0.7);
     if (e === 'grin' || e === 'laugh') ink(path(q => { q.moveTo(ex - w * 0.7, ey + 0.1); q.quadraticCurveTo(ex, ey + 0.15, ex + w * 0.8, ey + 0.09); }), lw * 0.7);
     if (p.age > 0.4) for (let k = 0; k < 3; k++) ink(path(q => { q.moveTo(ex + sd * (w + 0.02), ey + (k - 1) * 0.03); q.lineTo(ex + sd * (w + 0.09), ey + (k - 1) * 0.05); }), lw * 0.5);
@@ -166,7 +172,7 @@ function person(cx, cy, r, p) {
   for (const sd of [-1, 1]) fillInk(path(q => q.ellipse(sd * 0.055, 0.265, 0.03, 0.015, 0, 0, Math.PI * 2)), INK, 0);
   // --- mouth
   if (e === 'grin' || e === 'laugh') {
-    const mw = e === 'laugh' ? 0.36 : 0.4, mb = e === 'laugh' ? 1.0 : 0.88;
+    const mw = e === 'laugh' ? 0.36 : 0.4, mb = (e === 'laugh' ? 0.86 : 0.74) + 0.2 * talk;
     const m = path(q => { q.moveTo(-mw, 0.42); q.quadraticCurveTo(0, 0.5, mw, 0.42); q.quadraticCurveTo(0, mb, -mw, 0.42); q.closePath(); });
     fillInk(m, '#5a0f16', 0);
     x.save(); x.clip(m);
@@ -179,16 +185,18 @@ function person(cx, cy, r, p) {
     if (p.tongue) { const tg = path(q => { q.moveTo(-0.14, mb - 0.08); q.quadraticCurveTo(-0.16, mb + 0.3, 0.02, mb + 0.32); q.quadraticCurveTo(0.18, mb + 0.3, 0.14, mb - 0.08); q.closePath(); }); fillInk(tg, '#e4707a', lw * 1.2); ink(path(q => { q.moveTo(0, mb); q.lineTo(0, mb + 0.2); }), lw * 0.6); }
     for (const sd of [-1, 1]) ink(path(q => { q.moveTo(sd * 0.2, 0.2); q.quadraticCurveTo(sd * (mw + 0.12), 0.32, sd * (mw + 0.05), 0.55); }), lw * 1.1);
   } else if (e === 'scared' || e === 'whisper') {
-    const ow = e === 'scared' ? 0.15 : 0.1;
-    const m = path(q => { q.moveTo(-ow, 0.56); q.quadraticCurveTo(0, 0.5, ow, 0.56); q.quadraticCurveTo(0, e === 'scared' ? 0.76 : 0.66, -ow, 0.56); q.closePath(); });
+    const ow = (e === 'scared' ? 0.15 : 0.1) * (0.75 + 0.5 * talk), bot = 0.56 + (e === 'scared' ? 0.2 : 0.1) * (0.45 + 0.9 * talk);
+    const m = path(q => { q.moveTo(-ow, 0.56); q.quadraticCurveTo(0, 0.5, ow, 0.56); q.quadraticCurveTo(0, bot, -ow, 0.56); q.closePath(); });
     fillInk(m, '#3a0c12', lw * 1.2);
-    if (F) fillInk(path(q => { q.moveTo(-ow - 0.03, 0.56); q.quadraticCurveTo(0, e === 'scared' ? 0.84 : 0.72, ow + 0.03, 0.56); q.quadraticCurveTo(0, e === 'scared' ? 0.78 : 0.68, -ow - 0.03, 0.56); q.closePath(); }), '#c9757a', lw * 0.6);
+    if (F) fillInk(path(q => { q.moveTo(-ow - 0.03, 0.56); q.quadraticCurveTo(0, bot + 0.08, ow + 0.03, 0.56); q.quadraticCurveTo(0, bot + 0.02, -ow - 0.03, 0.56); q.closePath(); }), '#c9757a', lw * 0.6);
   } else {
     const m = path(q => { q.moveTo(-0.26, 0.5); q.quadraticCurveTo(0, 0.62, 0.26, 0.49); });
+    if (talk > 0.05) fillInk(path(q => { q.moveTo(-0.17, 0.53); q.quadraticCurveTo(0, 0.56, 0.17, 0.53); q.quadraticCurveTo(0, 0.56 + 0.18 * talk, -0.17, 0.53); q.closePath(); }), '#4a1418', lw);
     if (F) fillInk(path(q => { q.moveTo(-0.24, 0.51); q.quadraticCurveTo(0, 0.68, 0.24, 0.5); q.quadraticCurveTo(0, 0.6, -0.24, 0.51); q.closePath(); }), '#c46c74', 0);
     ink(m, lw * 1.4);
     for (const sd of [-1, 1]) ink(path(q => { q.moveTo(sd * 0.26, 0.45); q.quadraticCurveTo(sd * 0.31, 0.5, sd * 0.27, 0.55); }), lw * 0.8);
   }
+  x.restore();
   x.restore();
 }
 

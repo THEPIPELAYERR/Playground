@@ -2,7 +2,13 @@
 
 This continues straight from Part 2's cliffhanger and follows the **IN** branch.
 
-**Format change:** this is a **motion comic**: inked panels, flat colors, caption boxes, speech balloons and sound-effect lettering, with camera moves and panel slides. It's closer to how Crossed actually looks (a comic) and moves away from the dark-corridor "horror game" look. The channel stays faceless; voices come from voice actors or AI voices (see the cue sheet below).
+**Format:** a **2D animated short**. Chris said no to the comic-panel version. Characters are animated every frame:
+- mouths move with their lines, eyes blink, heads turn and tilt, bodies breathe and shake when they laugh
+- the camera moves: the truck drives in, the tire iron swings with motion blur, Dale gets knocked down, the faces slam onto the glass, the door creaks open, and there's a whip pan to Grandma rocking and knitting
+- regular subtitles at the bottom: white = narrator, yellow = Maddie, red = the infected
+- no panel borders, caption boxes, speech balloons or sound-effect lettering
+
+The channel stays faceless; voices come from voice actors or AI voices (see the cue sheet below).
 
 **Series rules:**
 - The infected are ordinary people with the bloom rash.
@@ -12,23 +18,23 @@ This continues straight from Part 2's cliffhanger and follows the **IN** branch.
 
 Length: 53 s.
 
-## Panels
-| Time | Panel | Caption box / balloon | SFX |
+## Scenes
+| Time | Scene | Dialogue (subtitled) | Sound |
 |---|---|---|---|
-| 0.0–4.0 | A pickup and a church van in the headlights, infected standing in the truck bed, grinning | THERE WERE ELEVEN OF THEM. | VRRRMM |
-| 4.0–8.6 | A woman in curlers and a bathrobe, a rake over her shoulder, waving | 🗨 "Hi sweetie! You lost?" · THEY WERE FRIENDLY. THAT WAS THE WORST PART. | |
-| 8.6–13.0 | Dale holding the door open, laughing, the bright store behind him | 🗨 "Door's open, buddy! Come on in!" · ELEVEN BEHIND ME. ONE IN FRONT. | HA HA HA |
+| 0.0–4.0 | A pickup and a church van in the headlights, infected standing in the truck bed, grinning | THERE WERE ELEVEN OF THEM. | Engines, mob laughing |
+| 4.0–8.6 | A woman in curlers and a bathrobe, a rake over her shoulder, waving | "Hi sweetie! You lost?" · THEY WERE FRIENDLY. THAT WAS THE WORST PART. | |
+| 8.6–13.0 | Dale holding the door open, laughing, the bright store behind him | "Door's open, buddy! Come on in!" · ELEVEN BEHIND ME. ONE IN FRONT. | Dale's laugh |
 | 13.0–16.6 | First person: his fist on a tire iron, the store far ahead | I HAD A TIRE IRON. · AND ONE WAY TO GO. | |
-| 16.6–20.6 | Impact panel: speed lines, Dale knocked back, still laughing | SO I WENT IN. · 🗨 "HA— HA HA HA!" | KRAK! |
-| 20.6–26.6 | From inside: the mob's faces and palms pressed to the glass | I LOCKED THE DOOR. · THEY DIDN'T EVEN TRY IT. THEY JUST WATCHED. · 🗨 "Take your time!" | CLICK |
-| 26.6–31.0 | The back-room door, ajar, with a blood trail running under it | THE TRAIL WENT TO THE BACK ROOM. · 🗨 "...hello?" · MADDIE. | |
-| 31.0–37.4 | Maddie tied to a chair, crying, **no rash** | 🗨 "You came. You actually came." · NO RASH. SHE WAS CLEAN. · 🗨 "You have to go. Now." | |
-| 37.4–42.4 | Extreme close-up: Maddie whispering, eyes sliding to the corner | 🗨 *(whisper)* "Dale's not the one in charge." · "She is." | |
-| 42.4–49.0 | **Grandma** in a rocking chair in the dark corner, rash, gentle smile, knitting a red scarf with smiley faces | 🗨 "Sit down, honey." · "We've been waiting for you." | tik tik tik |
-| 49.0–53.0 | End card | **PART 4?** · WHO IS SHE? · FOLLOW + COMMENT YOUR THEORY | |
+| 16.6–20.6 | The swing: Dale is knocked down, and the camera tilts down to him on the floor, still laughing | SO I WENT IN. · "HA— HA HA HA!" | Swing whoosh, impact, the crowd cheers |
+| 20.6–26.6 | From inside: the mob's faces and palms pressed to the glass | I LOCKED THE DOOR. · THEY DIDN'T EVEN TRY IT. THEY JUST WATCHED. · "Take your time!" | Door slam, lock click, palms slapping; outside goes muffled |
+| 26.6–31.0 | The back-room door, ajar, with a blood trail running under it | THE TRAIL WENT TO THE BACK ROOM. · "...hello?" · MADDIE. | |
+| 31.0–37.4 | Maddie tied to a chair, crying, **no rash** | "You came. You actually came." · NO RASH. SHE WAS CLEAN. · "You have to go. Now." | |
+| 37.4–42.4 | Extreme close-up: Maddie whispering, eyes sliding to the corner | *(whisper)* "Dale's not the one in charge." · "She is." | |
+| 42.4–49.0 | **Grandma** in a rocking chair in the dark corner, rash, gentle smile, knitting a red scarf with smiley faces | "Sit down, honey." · "We've been waiting for you." | Rocking chair, knitting clicks, humming |
+| 49.0–53.0 | End card | **PART 4** · Who is she? · Follow so you don't miss it | Music box |
 
 ## Voice cue sheet
-For voice actors or an AI voice tool. Times are when each line appears on screen, so start the line there. `projects/they-smile-part-3/vo-cues.csv` is the same table as a file.
+For voice actors or an AI voice tool. Times are when each line's subtitle appears and the character's mouth starts moving, so start the line there. `projects/they-smile-part-3/vo-cues.csv` is the same table as a file.
 
 | # | Time | Character | Line | Direction |
 |---|---|---|---|---|
