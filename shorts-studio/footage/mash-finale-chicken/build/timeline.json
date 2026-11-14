@@ -1,0 +1,748 @@
+{
+ "caps": [
+  {
+   "w": "The",
+   "t": 0.57,
+   "scene": "hook"
+  },
+  {
+   "w": "M*A*S*H",
+   "t": 0.73,
+   "scene": "hook"
+  },
+  {
+   "w": "finale",
+   "t": 1.29,
+   "scene": "hook"
+  },
+  {
+   "w": "has",
+   "t": 1.93,
+   "scene": "hook"
+  },
+  {
+   "w": "a",
+   "t": 2.17,
+   "scene": "hook"
+  },
+  {
+   "w": "chicken",
+   "t": 2.33,
+   "scene": "hook"
+  },
+  {
+   "w": "in",
+   "t": 2.81,
+   "scene": "hook"
+  },
+  {
+   "w": "it.",
+   "t": 3.13,
+   "scene": "hook"
+  },
+  {
+   "w": "It",
+   "t": 4.33,
+   "scene": "hook2"
+  },
+  {
+   "w": "was",
+   "t": 4.49,
+   "scene": "hook2"
+  },
+  {
+   "w": "never",
+   "t": 4.73,
+   "scene": "hook2"
+  },
+  {
+   "w": "a",
+   "t": 5.05,
+   "scene": "hook2"
+  },
+  {
+   "w": "chicken.",
+   "t": 5.21,
+   "scene": "hook2"
+  },
+  {
+   "w": "Goodbye,",
+   "t": 6.41,
+   "scene": "date"
+  },
+  {
+   "w": "Farewell",
+   "t": 7.13,
+   "scene": "date"
+  },
+  {
+   "w": "and",
+   "t": 7.85,
+   "scene": "date"
+  },
+  {
+   "w": "Amen",
+   "t": 8.01,
+   "scene": "date"
+  },
+  {
+   "w": "aired",
+   "t": 8.81,
+   "scene": "date"
+  },
+  {
+   "w": "February",
+   "t": 9.21,
+   "scene": "date"
+  },
+  {
+   "w": "28th,",
+   "t": 9.77,
+   "scene": "date"
+  },
+  {
+   "w": "1983,",
+   "t": 10.65,
+   "scene": "date"
+  },
+  {
+   "w": "on",
+   "t": 12.17,
+   "scene": "date"
+  },
+  {
+   "w": "CBS.",
+   "t": 12.33,
+   "scene": "date"
+  },
+  {
+   "w": "About",
+   "t": 13.53,
+   "scene": "viewers"
+  },
+  {
+   "w": "106",
+   "t": 13.85,
+   "scene": "viewers"
+  },
+  {
+   "w": "million",
+   "t": 14.73,
+   "scene": "viewers"
+  },
+  {
+   "w": "US",
+   "t": 15.21,
+   "scene": "viewers"
+  },
+  {
+   "w": "viewers.",
+   "t": 15.61,
+   "scene": "viewers"
+  },
+  {
+   "w": "Still",
+   "t": 16.41,
+   "scene": "viewers"
+  },
+  {
+   "w": "the",
+   "t": 17.05,
+   "scene": "viewers"
+  },
+  {
+   "w": "most-watched",
+   "t": 17.13,
+   "scene": "viewers"
+  },
+  {
+   "w": "scripted",
+   "t": 17.69,
+   "scene": "viewers"
+  },
+  {
+   "w": "episode.",
+   "t": 18.17,
+   "scene": "viewers"
+  },
+  {
+   "w": "Hawkeye",
+   "t": 19.37,
+   "scene": "hospital"
+  },
+  {
+   "w": "is",
+   "t": 20.01,
+   "scene": "hospital"
+  },
+  {
+   "w": "in",
+   "t": 20.09,
+   "scene": "hospital"
+  },
+  {
+   "w": "a",
+   "t": 20.25,
+   "scene": "hospital"
+  },
+  {
+   "w": "psychiatric",
+   "t": 20.33,
+   "scene": "hospital"
+  },
+  {
+   "w": "hospital.",
+   "t": 21.13,
+   "scene": "hospital"
+  },
+  {
+   "w": "Then",
+   "t": 22.33,
+   "scene": "bus"
+  },
+  {
+   "w": "a",
+   "t": 22.57,
+   "scene": "bus"
+  },
+  {
+   "w": "bus,",
+   "t": 22.73,
+   "scene": "bus"
+  },
+  {
+   "w": "and",
+   "t": 23.09,
+   "scene": "bus"
+  },
+  {
+   "w": "an",
+   "t": 23.45,
+   "scene": "bus"
+  },
+  {
+   "w": "enemy",
+   "t": 23.61,
+   "scene": "bus"
+  },
+  {
+   "w": "patrol.",
+   "t": 24.01,
+   "scene": "bus"
+  },
+  {
+   "w": "Hawkeye",
+   "t": 25.21,
+   "scene": "quiet"
+  },
+  {
+   "w": "tells",
+   "t": 25.65,
+   "scene": "quiet"
+  },
+  {
+   "w": "the",
+   "t": 26.09,
+   "scene": "quiet"
+  },
+  {
+   "w": "woman",
+   "t": 26.17,
+   "scene": "quiet"
+  },
+  {
+   "w": "to",
+   "t": 26.41,
+   "scene": "quiet"
+  },
+  {
+   "w": "keep",
+   "t": 26.57,
+   "scene": "quiet"
+  },
+  {
+   "w": "her",
+   "t": 26.73,
+   "scene": "quiet"
+  },
+  {
+   "w": "chicken",
+   "t": 26.89,
+   "scene": "quiet"
+  },
+  {
+   "w": "quiet.",
+   "t": 27.45,
+   "scene": "quiet"
+  },
+  {
+   "w": "It",
+   "t": 28.65,
+   "scene": "baby"
+  },
+  {
+   "w": "was",
+   "t": 28.81,
+   "scene": "baby"
+  },
+  {
+   "w": "her",
+   "t": 28.97,
+   "scene": "baby"
+  },
+  {
+   "w": "baby.",
+   "t": 29.21,
+   "scene": "baby"
+  },
+  {
+   "w": "He",
+   "t": 30.41,
+   "scene": "word"
+  },
+  {
+   "w": "buried",
+   "t": 30.65,
+   "scene": "word"
+  },
+  {
+   "w": "that",
+   "t": 30.97,
+   "scene": "word"
+  },
+  {
+   "w": "memory",
+   "t": 31.13,
+   "scene": "word"
+  },
+  {
+   "w": "under",
+   "t": 31.69,
+   "scene": "word"
+  },
+  {
+   "w": "one",
+   "t": 31.93,
+   "scene": "word"
+  },
+  {
+   "w": "word:",
+   "t": 32.33,
+   "scene": "word"
+  },
+  {
+   "w": "chicken.",
+   "t": 33.61,
+   "scene": "word"
+  },
+  {
+   "w": "The",
+   "t": 34.81,
+   "scene": "armistice"
+  },
+  {
+   "w": "armistice",
+   "t": 35.05,
+   "scene": "armistice"
+  },
+  {
+   "w": "ends",
+   "t": 35.61,
+   "scene": "armistice"
+  },
+  {
+   "w": "the",
+   "t": 36.17,
+   "scene": "armistice"
+  },
+  {
+   "w": "war.",
+   "t": 36.41,
+   "scene": "armistice"
+  },
+  {
+   "w": "Winchester",
+   "t": 37.61,
+   "scene": "mozart"
+  },
+  {
+   "w": "teaches",
+   "t": 38.57,
+   "scene": "mozart"
+  },
+  {
+   "w": "Chinese",
+   "t": 39.05,
+   "scene": "mozart"
+  },
+  {
+   "w": "POW",
+   "t": 39.53,
+   "scene": "mozart"
+  },
+  {
+   "w": "musicians",
+   "t": 40.41,
+   "scene": "mozart"
+  },
+  {
+   "w": "Mozart.",
+   "t": 41.21,
+   "scene": "mozart"
+  },
+  {
+   "w": "Later,",
+   "t": 42.41,
+   "scene": "music"
+  },
+  {
+   "w": "most",
+   "t": 42.97,
+   "scene": "music"
+  },
+  {
+   "w": "of",
+   "t": 43.29,
+   "scene": "music"
+  },
+  {
+   "w": "them",
+   "t": 43.45,
+   "scene": "music"
+  },
+  {
+   "w": "are",
+   "t": 43.61,
+   "scene": "music"
+  },
+  {
+   "w": "killed,",
+   "t": 43.85,
+   "scene": "music"
+  },
+  {
+   "w": "and",
+   "t": 45.05,
+   "scene": "music"
+  },
+  {
+   "w": "music",
+   "t": 45.29,
+   "scene": "music"
+  },
+  {
+   "w": "pains",
+   "t": 45.77,
+   "scene": "music"
+  },
+  {
+   "w": "him.",
+   "t": 46.73,
+   "scene": "music"
+  },
+  {
+   "w": "Klinger,",
+   "t": 47.93,
+   "scene": "klinger"
+  },
+  {
+   "w": "who",
+   "t": 48.97,
+   "scene": "klinger"
+  },
+  {
+   "w": "spent",
+   "t": 49.29,
+   "scene": "klinger"
+  },
+  {
+   "w": "years",
+   "t": 49.61,
+   "scene": "klinger"
+  },
+  {
+   "w": "trying",
+   "t": 49.93,
+   "scene": "klinger"
+  },
+  {
+   "w": "to",
+   "t": 50.25,
+   "scene": "klinger"
+  },
+  {
+   "w": "get",
+   "t": 50.41,
+   "scene": "klinger"
+  },
+  {
+   "w": "home,",
+   "t": 50.57,
+   "scene": "klinger"
+  },
+  {
+   "w": "marries",
+   "t": 50.97,
+   "scene": "klinger"
+  },
+  {
+   "w": "Soon-Lee",
+   "t": 51.77,
+   "scene": "klinger"
+  },
+  {
+   "w": "and",
+   "t": 52.49,
+   "scene": "klinger"
+  },
+  {
+   "w": "stays",
+   "t": 52.73,
+   "scene": "klinger"
+  },
+  {
+   "w": "in",
+   "t": 53.05,
+   "scene": "klinger"
+  },
+  {
+   "w": "Korea.",
+   "t": 53.21,
+   "scene": "klinger"
+  },
+  {
+   "w": "BJ",
+   "t": 54.41,
+   "scene": "bj"
+  },
+  {
+   "w": "can't",
+   "t": 55.05,
+   "scene": "bj"
+  },
+  {
+   "w": "say",
+   "t": 55.37,
+   "scene": "bj"
+  },
+  {
+   "w": "goodbye",
+   "t": 55.53,
+   "scene": "bj"
+  },
+  {
+   "w": "out",
+   "t": 56.09,
+   "scene": "bj"
+  },
+  {
+   "w": "loud.",
+   "t": 56.33,
+   "scene": "bj"
+  },
+  {
+   "w": "As",
+   "t": 57.53,
+   "scene": "stones"
+  },
+  {
+   "w": "Hawkeye's",
+   "t": 57.77,
+   "scene": "stones"
+  },
+  {
+   "w": "helicopter",
+   "t": 58.57,
+   "scene": "stones"
+  },
+  {
+   "w": "lifts",
+   "t": 59.13,
+   "scene": "stones"
+  },
+  {
+   "w": "off,",
+   "t": 59.69,
+   "scene": "stones"
+  },
+  {
+   "w": "he",
+   "t": 60.49,
+   "scene": "stones"
+  },
+  {
+   "w": "sees",
+   "t": 60.73,
+   "scene": "stones"
+  },
+  {
+   "w": "GOODBYE",
+   "t": 61.13,
+   "scene": "stones"
+  },
+  {
+   "w": "spelled",
+   "t": 62.25,
+   "scene": "stones"
+  },
+  {
+   "w": "in",
+   "t": 62.65,
+   "scene": "stones"
+  },
+  {
+   "w": "stones.",
+   "t": 62.89,
+   "scene": "stones"
+  },
+  {
+   "w": "I've",
+   "t": 64.09,
+   "scene": "end"
+  },
+  {
+   "w": "never",
+   "t": 64.73,
+   "scene": "end"
+  },
+  {
+   "w": "heard",
+   "t": 64.97,
+   "scene": "end"
+  },
+  {
+   "w": "the",
+   "t": 65.29,
+   "scene": "end"
+  },
+  {
+   "w": "word",
+   "t": 65.45,
+   "scene": "end"
+  },
+  {
+   "w": "chicken",
+   "t": 65.77,
+   "scene": "end"
+  },
+  {
+   "w": "the",
+   "t": 66.41,
+   "scene": "end"
+  },
+  {
+   "w": "same",
+   "t": 66.65,
+   "scene": "end"
+  },
+  {
+   "w": "way",
+   "t": 66.89,
+   "scene": "end"
+  },
+  {
+   "w": "since.",
+   "t": 67.29,
+   "scene": "end"
+  }
+ ],
+ "scenes": [
+  {
+   "scene": "hook",
+   "t0": 0.35,
+   "t1": 3.83,
+   "text": "The M*A*S*H finale has a chicken in it."
+  },
+  {
+   "scene": "hook2",
+   "t0": 4.11,
+   "t1": 5.91,
+   "text": "It was never a chicken."
+  },
+  {
+   "scene": "date",
+   "t0": 6.19,
+   "t1": 13.03,
+   "text": "Goodbye, Farewell and Amen aired February 28th, 1983, on CBS."
+  },
+  {
+   "scene": "viewers",
+   "t0": 13.31,
+   "t1": 18.87,
+   "text": "About 106 million US viewers. Still the most-watched scripted episode."
+  },
+  {
+   "scene": "hospital",
+   "t0": 19.15,
+   "t1": 21.83,
+   "text": "Hawkeye is in a psychiatric hospital."
+  },
+  {
+   "scene": "bus",
+   "t0": 22.11,
+   "t1": 24.71,
+   "text": "Then a bus, and an enemy patrol."
+  },
+  {
+   "scene": "quiet",
+   "t0": 24.99,
+   "t1": 28.15,
+   "text": "Hawkeye tells the woman to keep her chicken quiet."
+  },
+  {
+   "scene": "baby",
+   "t0": 28.43,
+   "t1": 29.91,
+   "text": "It was her baby."
+  },
+  {
+   "scene": "word",
+   "t0": 30.19,
+   "t1": 34.31,
+   "text": "He buried that memory under one word: chicken."
+  },
+  {
+   "scene": "armistice",
+   "t0": 34.59,
+   "t1": 37.11,
+   "text": "The armistice ends the war."
+  },
+  {
+   "scene": "mozart",
+   "t0": 37.39,
+   "t1": 41.91,
+   "text": "Winchester teaches Chinese POW musicians Mozart."
+  },
+  {
+   "scene": "music",
+   "t0": 42.19,
+   "t1": 47.43,
+   "text": "Later, most of them are killed, and music pains him."
+  },
+  {
+   "scene": "klinger",
+   "t0": 47.71,
+   "t1": 53.91,
+   "text": "Klinger, who spent years trying to get home, marries Soon-Lee and stays in Korea."
+  },
+  {
+   "scene": "bj",
+   "t0": 54.19,
+   "t1": 57.03,
+   "text": "BJ can't say goodbye out loud."
+  },
+  {
+   "scene": "stones",
+   "t0": 57.31,
+   "t1": 63.59,
+   "text": "As Hawkeye's helicopter lifts off, he sees GOODBYE spelled in stones."
+  },
+  {
+   "scene": "end",
+   "t0": 63.87,
+   "t1": 67.99,
+   "text": "I've never heard the word chicken the same way since."
+  }
+ ],
+ "dur": 69.19000000000003
+}

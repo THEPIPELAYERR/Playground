@@ -1,0 +1,18 @@
+file: renders/mash-finale-chicken.mp4
+length: 69.166667s  size: 1080x1920  fps: 30/1
+
+I:         -14.0 LUFS
+LRA:         3.8 LU
+Peak:       -0.8 dBFS
+
+loudness per section (mean dB):
+  0.00s: -13.7 dB
+  8.65s: -13.2 dB
+  17.29s: -13.2 dB
+  25.94s: -13.4 dB
+  34.58s: -13.7 dB
+  43.23s: -12.4 dB
+  51.88s: -11.8 dB
+  60.52s: -12.9 dB
+
+silent gaps over 1.2s:
